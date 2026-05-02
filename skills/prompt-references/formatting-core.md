@@ -70,16 +70,8 @@ Include at the end:
 
 ## Tool-Routing Awareness
 
-After formatting, check whether the task is better suited to another tool. Brief note, not blocking.
+After formatting, check whether the task is better suited to a different capability available in this environment. Available: Claude Code (default — strong at reasoning, editing, local files), Stata (via MCP for statistical work), Gmail / Google Calendar / Google Drive (via MCP), web fetch (read-only, limited). If a task requires capability not available here (e.g., heavy live-web synthesis), note the limitation in the output rather than suggesting an external tool the user does not have integrated.
 
-| Signal | Suggested tool | Reason |
-|--------|---------------|--------|
-| Deep multi-source literature review, "find everything about X" | ChatGPT Deep Research | Better web synthesis |
-| Citation-heavy factual lookup, sourced answers | Perplexity | Inline citations, live sources |
-| Heavy spreadsheet work (formulas, pivots, formatting) | Gemini | Native Sheets integration |
-| Video/audio analysis | Gemini | Can process media directly |
-| Otherwise | Proceed in Claude Code | Strong at reasoning, editing, local files |
-
-**For `/prompt`**: Add a brief note before executing if another tool would serve better.
-**For `/prompt-only`**: Add `**Best run in:** [tool] — [reason]` after the code block.
-**For `/prompt-refine`**: Note in the changes list if the refined prompt would benefit from a specific tool.
+**For `/prompt`**: Add a brief note before executing if a capability gap is relevant.
+**For `/prompt-only`**: Note any capability gap after the code block.
+**For `/prompt-refine`**: Note in the changes list if the refined prompt has a capability constraint.

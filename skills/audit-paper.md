@@ -1,8 +1,8 @@
 ---
 name: audit-paper
-description: Audit academic papers (economics/finance) for typos, grammar, style, prose quality, apparatus, and structural coherence. Default uses track-changes markup in Modules 2-5; use --clean for clean text throughout. Use when user asks to audit or review a paper.
+description: Audit academic papers (economics/finance) for typos, grammar, style, prose quality, apparatus, structural coherence, holistic craft, and AI-pattern detection. Default uses track-changes markup in Modules 2-7; use --clean for clean text throughout. Module 6 (Voice & Craft) is offered after Module 5 completes; Module 7 (AI Pattern Detection) is offered after Module 6. Use when user asks to audit or review a paper.
 disable-model-invocation: false
-argument-hint: "[--clean] [path-to-paper-files]"
+argument-hint: "[--clean] [--modules 1,2,5] [path-to-paper-files]"
 ---
 
 # 0. OPTIONAL: CITATION VERIFICATION
@@ -11,7 +11,7 @@ Before starting the audit, ask the user:
 
 > "Do you also want me to verify your citations (check that cited papers actually support the claims)? This runs `/lit-review-verify` in parallel with the audit."
 
-- If **yes**: immediately launch a background subagent (using the Agent tool with `run_in_background: true`) that runs `/lit-review-verify` on the same .tex and .bib files. The subagent should read the lit-review-verify skill file and follow its instructions, auto-confirming the Phase 1 extraction. Then proceed with the main audit as normal, without waiting. When all audit modules are finished, check whether the citation verification has completed and present its results. If still running, let the user know.
+- If **yes**: note this. After all audit modules are complete, run `/lit-review-verify` on the same .tex and .bib files and present the results. This runs sequentially after the audit, not in parallel, to avoid fragile background subagent issues.
 - If **no** (or the user just wants to get started): proceed with the audit as normal.
 
 This is a single yes/no question. Do not elaborate or explain the citation verification process unless asked.
@@ -22,16 +22,32 @@ This is a single yes/no question. Do not elaborate or explain the citation verif
 
 **First, check `$ARGUMENTS` for the `--clean` flag.** If `--clean` appears in the arguments, use **CLEAN MODE** without asking. If `--clean` is absent, **ask the user before proceeding:**
 
-> "Would you like me to use **track-changes markup** (`\rsout{deleted}` / `\red{added}`) or **clean text** for suggestions in Modules 2–5? (Module 1 always uses clean text.)"
+> "Would you like me to use **track-changes markup** (`\rsout{deleted}` / `\red{added}`) or **clean text** for suggestions in Modules 2–7? (Module 1 always uses clean text.)"
 
 Wait for the answer. Then proceed with the selected mode.
 
-| Mode | Module 1 | Modules 2–5 |
+| Mode | Module 1 | Modules 2–7 |
 |------|----------|-------------|
 | **Track-changes** | Clean corrected text | `\rsout{deleted text}` and `\red{added text}` markup |
 | **Clean** | Clean corrected text | Clean corrected text |
 
 **Re-read this box before writing suggestions for EACH module.**
+
+**Track-changes preamble requirement:** If track-changes mode is selected, inform the user once (before Module 2) that their LaTeX preamble needs the following for the markup to compile:
+
+```latex
+\usepackage{soul}
+\usepackage{xcolor}
+\newcommand{\red}[1]{\textcolor{red}{#1}}
+\newcommand{\rsout}[1]{\sout{#1}}
+```
+
+State this once; do not repeat in later modules.
+
+
+## A2. MODULE SELECTION
+
+**Check `$ARGUMENTS` for `--modules`.** If `--modules N,N,N` appears (e.g., `--modules 1,2,5`), run only those modules in order. Skip unselected modules automatically without asking. If `--modules` is absent, follow the default sequential workflow with stop-and-check points as described below.
 
 
 # B. CRITICAL WORKFLOW REQUIREMENTS
@@ -49,13 +65,15 @@ Wait for the answer. Then proceed with the selected mode.
 
 I want you to audit my academic paper (economics/finance).
 
-The audit should proceed in **five** modules:
+The audit should proceed in **seven** modules:
 
 - **Module 1 — Correctness**: Check for typos, misspelled words, and grammar issues
 - **Module 2 — Style**: Syntax improvements (light and deep), repetition detection
 - **Module 3 — Prose Quality** (optional): Sentence-level checks, paragraph discipline, and economics-specific writing patterns based on McCloskey's *Economical Writing*
 - **Module 4 — Apparatus** (optional): Audit of tables, figures, equations, and footnotes for standalone clarity
 - **Module 5 — Structure & Coherence** (optional): Paper-type classification, design-specific completeness, argument-move audit, and claims-evidence mapping
+- **Module 6 — Voice & Craft** (optional): Holistic craft review based on writing style guidelines — opening strategy, pedagogical flow, results presentation, literature positioning
+- **Module 7 — AI Pattern Detection** (optional): Scan for language patterns that signal AI-generated text, based on the humanizer anti-AI framework
 
 
 ## D. IMPORTANT: Understanding the Input Files
@@ -155,18 +173,29 @@ This is the revised first sentence. The second sentence is now tighter. The thir
 Before finalizing ANY suggestion, verify that every LaTeX command present in the original text is preserved in the suggested text (unless the specific purpose of the edit is to remove that formatting). Failure to preserve LaTeX syntax makes suggestions unusable.
 
 
-## G. CHUNKING RULE
+## G. FILE DISCOVERY AND SCOPE
 
-**Multi-file chunking:** If the paper has 3 or more `.tex` files, process each module **one file at a time**. This means: produce your audit output (typos, grammar, style suggestions, etc.) for ONE file only, then STOP. Wait for approval before producing output for the next file. You may read all files upfront for context, but your output in each response must cover only one file.
+Before starting any module, identify all files to audit:
 
-**Section-based chunking:** For any paper over ~5,000 words (regardless of file count), process **ALL modules** by `\section{}` groups — batch 2-3 sections per response, and stop between batches for approval. This prevents output token overflow.
+1. If a path was provided in `$ARGUMENTS`, read that file (or all `.tex` files in that directory).
+2. Parse the main `.tex` file for `\input{}` and `\include{}` commands. List all sub-files found.
+3. Confirm the file order with the user. Note any files that cannot be found.
+4. Estimate the total word count of text content (excluding LaTeX commands, comments, and preamble). State the estimate and which chunking mode applies.
+5. If sections contain TODO placeholders or are marked as incomplete, note their existence but do not audit them. Focus on completed text.
 
-**Short papers** (under ~5,000 words with 1-2 files): process the whole paper per module.
+
+## H. CHUNKING RULE
+
+**Priority order** (apply the first rule that matches):
+
+1. **Multi-file papers (3+ files):** Process each module **one file at a time**. Produce output for ONE file, then STOP. Wait for approval before the next file. Within each file, if it exceeds ~5,000 words, apply rule 2 below.
+2. **Long content (over ~5,000 words in the current unit):** Process by `\section{}` groups, batching 2-3 sections per response. Stop between batches. If a single section exceeds ~3,000 words, give it its own batch.
+3. **Short papers (under ~5,000 words, 1-2 files):** Process the whole paper per module.
 
 **HARD LIMIT: If your output is growing long, STOP and break it into chunks. It is always better to stop early and continue in the next response than to hit the output token limit. Aim for no more than ~40 suggestions per response.**
 
 
-## H. IMPLEMENTATION RULES: MODULE 1
+## I. IMPLEMENTATION RULES: MODULE 1
 
 When I say **"implement correction XX"** (e.g., "implement T1, G3"), apply the change by **directly replacing** the original text with the corrected text.
 
@@ -178,7 +207,7 @@ When I say **"implement correction XX"** (e.g., "implement T1, G3"), apply the c
 4. **Do NOT use track-changes markup** (`\rsout{}`, `\red{}`, etc.) — just provide the clean corrected text
 
 
-## I. IMPLEMENTATION RULES: MODULES 2–4
+## J. IMPLEMENTATION RULES: MODULES 2–4
 
 **IF CLEAN MODE** (`--clean` was specified):
 Same as Module 1 — directly replace with clean corrected text. No markup.
@@ -194,6 +223,18 @@ Provide the full text with `\rsout{}` and `\red{}` markup ready to copy-paste. S
 4. Provide the file name and line number(s) for reference
 
 
+## K. IMPLEMENTATION RULES: MODULES 5–7
+
+When the user says "implement" for items from Modules 5-7, the action depends on the item type:
+
+- **D-items (Design completeness):** Draft the missing content (e.g., a paragraph discussing the identifying assumption) and provide it ready to insert at the specified location.
+- **A-items (Argument structure):** Provide the restructured paragraph(s), split, moved, or trimmed as suggested.
+- **C-items (Claims-evidence):** Provide the corrected text with the missing reference added, or flag the orphan result for the user to decide.
+- **V-items Type A (Voice/craft text-level):** Provide Original/Suggested text pairs as in Modules 2-4, respecting the current mode (track-changes or clean).
+- **V-items Type B (Voice/craft structural):** Draft the new content and specify where it should be inserted.
+- **AI-items (AI pattern detection):** Provide Original/Suggested text pairs as in Modules 2-4.
+
+
 ---
 
 ## Module 1: Correctness (Typos + Grammar)
@@ -202,11 +243,9 @@ Provide the full text with `\rsout{}` and `\red{}` markup ready to copy-paste. S
 
 > **MODULE 1: CORRECTNESS** — Checking typos, misspelled words, and grammar
 
-Read through the entire paper and identify all typos, misspelled words, and grammar issues.
+**⚠️ RULES REMINDER: (1) No em dashes. (2) Preserve all LaTeX. (3) Only report problems. (4) Never withdraw suggestions. (5) Apply consistency rule. (6) Review all prior user feedback before starting.**
 
-**See `references/audit-checklists.md`:**
-- **Typo Checklist** — what counts/doesn't count, 4-step verification (spelling, intended word, duplication, consistency)
-- **Grammar Checklist** — what counts/doesn't count, 5-step verification (subject-verb agreement, noun number, prepositions, articles, verb forms)
+Read through the entire paper and identify all typos, misspelled words, and grammar issues.
 
 Key exclusions: do NOT flag LaTeX commands, extra spaces (LaTeX collapses them), technical terms, proper nouns, stylistic choices, or field-specific conventions.
 
@@ -217,7 +256,7 @@ Key exclusions: do NOT flag LaTeX commands, extra spaces (LaTeX collapses them),
 - Grammar: G1, G2, G3, ...
 
 **OUTPUT ORDER REQUIREMENT:**
-List all issues in order of appearance in the document (by file, then by line number). Typos first, then grammar.
+Group by type: all typos first (## TYPOS), then all grammar issues (## GRAMMAR). Within each group, list in order of appearance (by file, then by line number).
 
 **Report format:**
 
@@ -275,11 +314,11 @@ You may:
 
 **⚠️ FORMAT REMINDER: Re-read section A (Mode Detection) now. If `--clean` was specified, provide clean corrected text. Otherwise, use `\rsout{}` and `\red{}` markup.**
 
-**⚠️ CHUNKING REMINDER: If this paper is over ~5,000 words, process by `\section{}` groups (2-3 sections per response). Stop between batches.**
+**⚠️ CHUNKING REMINDER: Re-read section H (Chunking Rule) now.**
+
+**⚠️ RULES REMINDER: (1) No em dashes. (2) Preserve all LaTeX. (3) Only report problems. (4) Never withdraw suggestions. (5) Apply consistency rule. (6) Review all prior user feedback before starting.**
 
 Read through the paper and suggest syntax improvements and flag repetition.
-
-**See `references/audit-checklists.md` → Style Checklist** for the full scope.
 
 ### Light syntax (sentence-level fixes)
 
@@ -301,6 +340,8 @@ Read through the paper and suggest syntax improvements and flag repetition.
 - Unnecessary hedging (e.g., "We think that..." when you can just state the point)
 - Sentences that should be combined or reordered
 - Transitions between paragraphs that are missing or weak
+- **Subordinate clause discipline:** When a sentence uses "While" or "Because" clauses, the context-setting clause should come first and the main assertion second. Flag sentences where the subordinate clause buries the main point or where clause ordering obscures logical flow.
+- **Passive-to-active for contributions:** Sentences stating the paper's contributions should use active, direct construction ("We show that...", "This paper provides..."). Flag passive or hedged contribution statements ("It is shown that...", "This paper aims to provide...").
 
 ### Repetition
 
@@ -384,9 +425,9 @@ You may:
 
 **⚠️ FORMAT REMINDER: Re-read section A (Mode Detection) now. If `--clean` was specified, provide clean corrected text. Otherwise, use `\rsout{}` and `\red{}` markup.**
 
-This module is optional. Only proceed if explicitly requested.
+**⚠️ RULES REMINDER: (1) No em dashes. (2) Preserve all LaTeX. (3) Only report problems. (4) Never withdraw suggestions. (5) Apply consistency rule. (6) Review all prior user feedback before starting.**
 
-This module targets sentence-level prose problems that are pervasive in economics writing, based on McCloskey's *Economical Writing*. Module 2 already catches verbose phrases, filler, and simple passive voice. This module goes deeper: it looks for patterns that individually seem minor but collectively make prose heavy and hard to read.
+This module is offered after Module 2 completes. It targets sentence-level prose problems that are pervasive in economics writing, based on McCloskey's *Economical Writing*. Module 2 already catches verbose phrases, filler, and simple passive voice. This module goes deeper: it looks for patterns that individually seem minor but collectively make prose heavy and hard to read.
 
 **Do NOT re-flag** anything already caught by Module 2. If you flagged "in order to" as S7, do not flag it again here.
 
@@ -502,9 +543,9 @@ You may:
 
 **⚠️ FORMAT REMINDER: Re-read section A (Mode Detection) now. If `--clean` was specified, provide clean corrected text. Otherwise, use `\rsout{}` and `\red{}` markup.**
 
-This module is optional. Only proceed if explicitly requested.
+**⚠️ RULES REMINDER: (1) No em dashes. (2) Preserve all LaTeX. (3) Only report problems. (4) Never withdraw suggestions. (5) Apply consistency rule. (6) Review all prior user feedback before starting.**
 
-This module audits the paper's apparatus (tables, figures, displayed equations, and footnotes) for standalone clarity. Readers often scan tables and figures before reading the text; titles and captions must carry meaning on their own. Equations need prose interpretation. Footnotes should not carry the paper's real argument.
+This module is offered after Module 3 completes. It audits the paper's apparatus (tables, figures, displayed equations, and footnotes) for standalone clarity. Readers often scan tables and figures before reading the text; titles and captions must carry meaning on their own. Equations need prose interpretation. Footnotes should not carry the paper's real argument.
 
 **Boundary with Module 3:** Module 4 checks apparatus *structure* (whether a title states a finding, whether a caption is self-contained, whether an equation is interpreted). Module 3 checks *prose quality within* the text. If a sentence near a table has a nominalization, that is a Module 3 issue, not Module 4. **Do NOT re-flag** anything already caught by Modules 2-3.
 
@@ -521,6 +562,10 @@ This module audits the paper's apparatus (tables, figures, displayed equations, 
 ### Footnotes
 
 - **Footnotes carrying the real argument.** Footnotes should contain supplementary information, not essential reasoning. Flag footnotes that contain: key identification assumptions, main mechanism explanations, important caveats that affect interpretation of results, or significant empirical results. *Fix:* Suggest promoting the content to the main text in condensed form. Do NOT flag footnotes that contain data source descriptions, technical estimation details, or minor clarifications; those belong in footnotes.
+
+### Economic magnitude translation
+
+- **Coefficients reported without economic interpretation.** When tables report regression coefficients, check whether the surrounding text translates key estimates into economically interpretable magnitudes (dollar terms, percentage of a standard deviation, comparison to a familiar benchmark). Flag results sections where coefficients are discussed only in terms of statistical significance without economic magnitude. *Bad:* "The coefficient on treatment is 0.034 and significant at the 1% level." *Good:* "The coefficient implies that treated firms increase investment by 3.4 percentage points, equivalent to approximately $2.1 million at the sample mean." This check applies to headline results only, not every coefficient in every robustness table.
 
 ### Constraints
 
@@ -589,9 +634,9 @@ You may:
 
 **⚠️ FORMAT REMINDER: Re-read section A (Mode Detection) now. If `--clean` was specified, provide clean corrected text. Otherwise, use `\rsout{}` and `\red{}` markup.**
 
-This module is optional. Only proceed if explicitly requested.
+**⚠️ RULES REMINDER: (1) No em dashes. (2) Preserve all LaTeX. (3) Only report problems. (4) Never withdraw suggestions. (5) Apply consistency rule. (6) Review all prior user feedback before starting.**
 
-This module checks paper-level structural coherence: whether the empirical design is complete for the paper type, whether each paragraph serves a clear purpose, and whether text claims and empirical results are properly linked. Unlike Modules 2-4 (which work at the sentence or element level), this module reads the paper as a whole.
+This module is offered after Module 4 completes. It checks paper-level structural coherence: whether the empirical design is complete for the paper type, whether each paragraph serves a clear purpose, and whether text claims and empirical results are properly linked. Unlike Modules 2-4 (which work at the sentence or element level), this module reads the paper as a whole.
 
 **Do NOT re-flag** anything already caught by Modules 2-4.
 
@@ -657,6 +702,7 @@ Flag paragraphs that:
 - **Serve no clear purpose** — the paragraph exists but does not advance the argument
 - **Try to do too many things** — e.g., presents a result, explains a mechanism, and qualifies it all at once
 - **Are in the wrong place** — e.g., a limitation buried mid-results instead of grouped with other limitations
+- **Empirical sections that do not open with their question.** Each empirical section or subsection should open by stating the question it answers or the hypothesis it tests. Flag sections that jump straight into specification or results without first orienting the reader. *Bad:* "Column (3) shows the effect of..." as a section opener. *Good:* "We now ask whether the treatment effect varies across firm size."
 
 Be conservative. Most paragraphs will be fine. Only flag clear structural problems where a reader would lose the thread. Do NOT flag every paragraph — that defeats the purpose.
 
@@ -725,11 +771,293 @@ If no issues in a sub-section, state "No [design / argument / claims-evidence] i
 When you stop, write:
 
 ```
-STOPPED - PAPER AUDIT COMPLETE
+STOPPED - AWAITING YOUR INPUT (Module 5: Structure & Coherence)
 
 You may:
 - Ask questions or request clarifications
 - Tell me which items to address (e.g., "implement D1, A3, C2")
+- Say "move to next" to proceed to Module 6 (Voice & Craft)
+- Say "done" to end the audit here
+```
+
+**Do NOT proceed to Module 6 until I explicitly say "move to next"**
+
+**When Module 5 is complete (after implementing any requested changes), ask:**
+
+> "The core inspections are done. Do you want me to run Module 6 for a holistic craft review based on your writing style guidelines? (Module 7, AI pattern detection, can follow after.)"
+
+If the answer is **yes**, proceed to Module 6. If **no**, end the audit.
+
+
+---
+
+## Module 6: Voice & Craft (Optional)
+
+**Before doing any work in this module, print this announcement on its own line:**
+
+> **MODULE 6: VOICE & CRAFT** — Holistic craft review based on writing style guidelines
+
+**⚠️ FORMAT REMINDER: Re-read section A (Mode Detection) now. If `--clean` was specified, provide clean corrected text. Otherwise, use `\rsout{}` and `\red{}` markup.**
+
+**⚠️ RULES REMINDER: (1) No em dashes. (2) Preserve all LaTeX. (3) Only report problems. (4) Never withdraw suggestions. (5) Apply consistency rule. (6) Review all prior user feedback before starting.**
+
+This module is optional. Only proceed if the user says "move to next" or answers "yes" to the Module 6 question.
+
+**MANDATORY: Before starting this module, read the reference file `~/.claude/commands/prompt-references/writing-style-guidelines.md` and use it as your checklist.** Do not work from memory of what the guidelines say. Read the file.
+
+This module evaluates the paper's craft at a holistic level: opening strategy, pedagogical flow, narrative arc, and voice. Unlike Modules 2-5 (which check discrete elements), this module reads the paper as a unified argument and assesses whether it follows best practices in applied economics writing.
+
+**Do NOT re-flag** anything already caught by Modules 1-5.
+
+### 6a. Opening strategy
+
+Check the introduction for:
+
+- **Practical problem first.** Does the introduction open with a concrete research problem or empirical puzzle, or does it open with a literature review or abstract motivation? Flag introductions that take more than two paragraphs to reach the research question.
+- **Contribution structure.** Are contributions stated clearly and affirmatively ("We show that...", "Our contribution is twofold. First,...")? Flag vague or passive contribution statements.
+- **Answer preview.** Are the main findings stated in the introduction (not just the question)? Flag introductions where the reader reaches the roadmap paragraph without knowing the paper's answer.
+- **Explicit roadmap.** Is there a clear paper organization statement? The reader should never question the direction of argument.
+
+### 6b. Pedagogical flow
+
+- **Intuition before formalism.** Does the paper provide a motivating example or simple case before the general framework? Flag papers that jump from introduction directly to the most general version of the model or estimator.
+- **Simple-to-complex progression.** When the paper builds a framework, does it start with the simplest case (e.g., 2x2, binary treatment) before generalizing? Flag sections where the general case is presented without a simpler lead-in.
+- **Running example.** Does the paper use a recurring example to build continuity? This is not required, but if an example is introduced early, check that it is referenced in later sections to help readers track concepts.
+- **"To see this" and direct reader engagement.** Does the paper address anticipated reader questions ("To see this, note that...", "Why?")? This is a sign of strong pedagogical writing. Its absence is not an error, but note if the paper is dense and could benefit from these devices.
+
+### 6c. Results presentation craft
+
+- **Visual results first.** Do results sections lead with figures before tables where possible? Flag sections that present only table-based results when a figure could communicate the main finding more effectively.
+- **Results-before-setup.** Before presenting numbers, does the text establish what comparison is being made and what sign/magnitude would support the hypothesis? Flag results paragraphs that open with "The coefficient is..." or "Column (3) shows..." without first stating the expected pattern. Good structure: (1) what we test, (2) what to expect, (3) what we find.
+
+### 6d. Literature positioning
+
+- **Constructive framing.** Does the paper position itself constructively relative to prior work ("Our paper expands on X in three key ways") rather than competitively ("Unlike X, who fail to account for...")? Flag adversarial framing.
+- **Credit and contrast.** Does the paper give credit generously while clearly distinguishing its own contribution? Flag places where the distinction between this paper and prior work is vague.
+
+### Constraints
+
+- **This module evaluates craft, not correctness.** Suggestions are about making the paper more effective, not fixing errors.
+- **Be conservative.** Only flag patterns that clearly weaken the paper. Not every paper needs a running example or a 2x2 lead-in.
+- **Preserve the author's voice.** Do not suggest rewrites that impose a different writing personality. Flag structural issues and let the author decide how to address them.
+- **Preserve ALL LaTeX formatting.**
+
+**Labeling:** V1, V2, V3, ... (V for Voice/craft)
+
+### Two suggestion types
+
+Module 6 suggestions fall into two categories. Use the right format for each:
+
+**Type A — Text-level suggestions (rewritable).** When the issue can be fixed by rewriting specific sentences or paragraphs (e.g., a passive contribution statement, a missing answer preview, an adversarial literature framing, a results paragraph that skips setup), provide concrete Original/Suggested text pairs, just like Modules 2-5. These are the majority of suggestions.
+
+**Type B — Structural suggestions (not rewritable).** When the issue requires adding new content that does not yet exist in the paper (e.g., "add a motivating example in Section 2," "add a roadmap paragraph," "lead with a figure before the table"), use the Issue/Suggestion/Reference format. Provide as much concrete guidance as possible: where the new content should go, what it should contain, and a draft if feasible.
+
+**Default to Type A.** If you can point to specific text and propose a rewrite, do so. Only use Type B when there is genuinely no existing text to revise.
+
+**Report format:**
+
+**IF TRACK-CHANGES MODE** (default):
+
+## VOICE & CRAFT (Module 6)
+
+**V1** (filename.tex, lines XX-YY) — *Type A*
+
+**Original:**
+The introduction opens with a literature review that delays the research question.
+**Suggested:**
+The introduction \rsout{opens with a literature review that delays the research question}\red{now leads with the concrete problem}.
+**Reason:** [brief explanation]
+**Reference:** [which section of the writing style guidelines this relates to]
+
+---
+
+**V2** (filename.tex, section X) — *Type B*
+
+**Issue:** [description of the structural craft problem]
+**Suggestion:** [what to add, where to add it, and a draft of the new content if feasible]
+**Reference:** [which section of the writing style guidelines this relates to]
+
+---
+
+**IF CLEAN MODE** (`--clean` was specified):
+Same structure, but Type A suggestions use clean corrected text instead of `\rsout{}`/`\red{}` markup.
+
+If no suggestions, state "No voice/craft issues found."
+
+**STOP and wait for approval.**
+
+When you stop, write:
+
+```
+STOPPED - AWAITING YOUR INPUT (Module 6: Voice & Craft)
+
+You may:
+- Ask questions or request clarifications
+- Tell me which items to address (e.g., "implement V1, V3")
+- Say "move to next" to proceed to Module 7 (AI Pattern Detection)
+- Say "done" to end the audit here
+```
+
+**Do NOT proceed to Module 7 until I explicitly say "move to next"**
+
+**When Module 6 is complete (after implementing any requested changes), ask:**
+
+> "Do you want me to run Module 7 to scan for AI-sounding language patterns (based on your humanizer anti-AI framework)?"
+
+If the answer is **yes**, proceed to Module 7. If **no**, end the audit.
+
+
+---
+
+## Module 7: AI Pattern Detection (Optional)
+
+**Before doing any work in this module, print this announcement on its own line:**
+
+> **MODULE 7: AI PATTERN DETECTION** — Scanning for language that signals AI-generated text
+
+**⚠️ FORMAT REMINDER: Re-read section A (Mode Detection) now. If `--clean` was specified, provide clean corrected text. Otherwise, use `\rsout{}` and `\red{}` markup.**
+
+**⚠️ RULES REMINDER: (1) No em dashes. (2) Preserve all LaTeX. (3) Only report problems. (4) Never withdraw suggestions. (5) Apply consistency rule. (6) Review all prior user feedback before starting.**
+
+This module is optional. Only proceed if the user says "move to next" or answers "yes" to the Module 7 question.
+
+**MANDATORY: Before starting this module, read the reference files `~/.claude/commands/prompt-references/humanizer-rules.md` and the "Negative Space" section of `~/.claude/commands/prompt-references/voice-profile-matray.md`. Use them as your checklist.** Do not work from memory of what the rules say. Read the files.
+
+This module scans the paper for language patterns that are characteristic of AI-generated text. These patterns may have entered the paper through AI-assisted drafting, or they may simply be habits that happen to overlap with AI style. Either way, a referee or reader who notices them will question the paper's authenticity. The goal is to flag every instance so the author can decide which to revise.
+
+**Do NOT re-flag** anything already caught by Modules 1-6. If a filler phrase was caught as S7 in Module 2, do not flag it again here. This module catches AI-specific patterns that earlier modules were not designed to detect.
+
+### 7a. AI vocabulary
+
+Flag any use of words and phrases that are strongly associated with AI-generated text. These words are rarely found in published economics papers and their presence is a red flag:
+
+- **Core AI words:** delve, foster, garner, interplay, intricate, landscape, tapestry, underscore, pivotal, showcase, testament, enhance, align with, crucial, additionally, furthermore, moreover (when used as sentence openers in clusters), multifaceted, nuanced (as filler adjective), comprehensive (when not describing data coverage), robust (when not describing a statistical test)
+- **Copula substitutes:** "serves as," "stands as," "boasts," "features" used where "is" or "has" would be natural. AI text avoids simple copulas. Economics papers should not. Flag every instance where the simpler verb works.
+
+For each flagged word, suggest a concrete replacement that sounds like a human economist wrote it. Often the fix is simply deleting the word or using a plain alternative.
+
+### 7b. Significance inflation
+
+Flag phrases that inflate the importance of findings or concepts beyond what the evidence supports, using characteristic AI amplification patterns:
+
+- "plays a pivotal/crucial/vital role" (say what it actually does)
+- "testament to" (just state the evidence)
+- "setting the stage for" (state the relationship directly)
+- "sheds light on" when overused (once is fine; three times signals AI)
+- "paving the way for" (state the implication directly)
+
+These phrases substitute rhetorical weight for actual content. The fix is almost always to replace the inflated phrase with a concrete statement of what happens.
+
+### 7c. Superficial -ing phrases
+
+AI text uses present participles as cheap connectors that sound analytical but add nothing:
+
+- "highlighting the importance of..."
+- "underscoring the need for..."
+- "emphasizing the role of..."
+- "reflecting the broader trend of..."
+- "showcasing the potential of..."
+- "demonstrating the significance of..."
+
+Flag these when they appear as sentence-level connectors or clause openers. The fix is to state the connection directly ("This result implies..." or "The data confirm...") or to cut the phrase entirely if the connection is already clear from context.
+
+### 7d. Promotional and editorial language
+
+Flag adjectives and adverbs that editorialize findings rather than letting the reader judge:
+
+- **Promotional:** vibrant, breathtaking, groundbreaking, nestled, renowned, stunning, remarkable, extraordinary
+- **Editorializing results:** striking, impressive, surprising, dramatic, notable, intriguing (when used to describe empirical findings)
+
+In economics papers, state the result and its magnitude. "The coefficient is 0.15, three times larger than the OLS estimate" lets the reader decide it is striking. Writing "The striking coefficient of 0.15" does the reader's job for them and sounds like AI.
+
+One exception: "novel" is acceptable when backed by a concrete reason ("novel because no prior dataset links X to Y"), but not as a bare assertion ("a novel contribution").
+
+### 7e. Structural AI patterns
+
+These are organizational and rhetorical patterns that AI defaults to:
+
+- **Rule of three.** AI text forces ideas into groups of three ("First... Second... Third..." or "X, Y, and Z") even when the content does not naturally divide that way. Flag instances where a list of three feels forced or where two items would suffice. (Note: genuine three-part contribution statements are fine when each part is substantive.)
+- **Negative parallelisms.** "It's not just X; it's Y" or "It's not merely X but also Y." This is a rhetorical tic AI uses constantly. Economics papers state what something is, not what it is not.
+- **False ranges.** "From X to Y" where X and Y are not endpoints of a meaningful scale. AI uses these to sound comprehensive. Flag when the range is decorative rather than informative.
+- **Synonym cycling.** Using different words for the same concept across consecutive sentences to avoid repetition ("firms," then "companies," then "enterprises"). In economics, precision requires one concept, one word. (This overlaps with Module 3's elegant variation check; flag here only if not already caught.)
+
+### 7f. Filler, hedging, and throat-clearing
+
+Flag patterns that pad the text without adding information:
+
+- **Filler phrases:** "it is important to note that" (delete), "it is worth mentioning that" (delete), "in the context of" (usually deletable), "it should be noted that" (delete)
+- **Excessive hedging clusters:** "could potentially possibly" or stacking multiple qualifiers ("may perhaps suggest"). One hedge per claim is fine; two or more signals AI uncertainty rather than scientific caution.
+- **Generic conclusions:** "the future looks bright," "exciting times ahead," "opens up new avenues for future research" (if the paper actually names specific future research, that is fine; flag only the generic version)
+
+### 7g. Formatting and punctuation tells
+
+- **Em dashes.** Already banned in your style, but double-check the entire document. Flag every `---` (em dash). For `--` (en dash), flag only if used between clauses rather than in a number range (e.g., "2000--2015" is fine).
+- **Boldface overuse.** AI text mechanically bolds key terms. Flag if terms are bolded beyond first-use definitions.
+- **Curly quotes.** Check for `\textquoteleft`/`\textquoteright` or Unicode curly quotes that may have leaked from AI output into LaTeX source.
+
+### 7h. Chat artifacts and tone
+
+Flag any residual AI chat patterns that may have survived editing:
+
+- "I hope this helps" or similar service-oriented phrases
+- "Great question" or "Excellent point" (should never appear in a paper, but check footnotes and author notes)
+- "As of [date]" or "based on available information" (knowledge disclaimers)
+- "Let's explore" or "let's dive in" (signposting)
+- Any phrase that reads as Claude/ChatGPT talking to the user rather than an author writing to a reader
+
+### Constraints
+
+- **Flag density, not exhaustiveness.** If a word appears 15 times, flag the first 3 instances and note "X more instances throughout the paper." Do not list every occurrence.
+- **Context matters.** "Robust" in "robust standard errors" is fine. "Robust" in "a robust framework for understanding" is AI. Use judgment.
+- **Preserve the author's meaning.** Every suggestion must convey the same information as the original.
+- **Preserve ALL LaTeX formatting.**
+- **Do NOT re-flag** anything caught in Modules 1-6.
+
+**Labeling:** AI1, AI2, AI3, ... with a category tag: `[vocab]`, `[inflation]`, `[ing-phrase]`, `[editorial]`, `[structural]`, `[filler]`, `[formatting]`, `[chat]`
+
+**Report format:**
+
+**IF TRACK-CHANGES MODE** (default):
+
+## AI PATTERN DETECTION (Module 7)
+
+**AI1** [vocab] (filename.tex, line XX)
+
+**Original:**
+This paper delves into the relationship between credit supply and firm investment.
+**Suggested:**
+This paper \rsout{delves into}\red{examines} the relationship between credit supply and firm investment.
+**Reason:** "Delve" is strongly associated with AI-generated text. "Examines" is standard academic usage.
+**Rule:** Humanizer Rules, #7 (AI vocabulary)
+
+---
+
+**AI2** [editorial] (filename.tex, line XX)
+
+**Original:**
+The striking coefficient of 0.15 suggests a dramatic shift in firm behavior.
+**Suggested:**
+The coefficient of 0.15\rsout{, striking in magnitude,} suggests a \rsout{dramatic} shift in firm behavior.
+**Reason:** "Striking" and "dramatic" editorialize the finding. State the magnitude and let the reader judge.
+**Rule:** Humanizer Rules, Editorializing Results
+
+---
+
+**IF CLEAN MODE** (`--clean` was specified):
+Same structure, but use clean corrected text instead of `\rsout{}`/`\red{}` markup.
+
+If no suggestions, state "No AI patterns detected." (Unlikely if any part of the paper was AI-assisted.)
+
+**STOP — PAPER AUDIT COMPLETE.**
+
+When you stop, write:
+
+```
+PAPER AUDIT COMPLETE (Modules 1-7)
+
+You may:
+- Ask questions or request clarifications
+- Tell me which items to address (e.g., "implement AI1, AI4, AI7")
 - Request additional review of specific sections
 ```
 
@@ -793,11 +1121,11 @@ When you find ANY error, immediately search the entire document for:
 
 This prevents inconsistent corrections and missed duplicates.
 
-### Second-pass requirement
+### Second-pass requirement (Module 1 only)
 
-Within each module, after your first pass through the document, do a second pass applying the systematic checks from the checklists. The first pass catches obvious errors; the second pass catches errors that require careful analysis.
+Within Module 1, after your first pass through the document, do a second pass applying the systematic checks below. The first pass catches obvious errors; the second pass catches errors that require careful analysis.
 
-**Second-pass mandatory checks (Module 1):**
+**Second-pass mandatory checks:**
 1. Search for every `\citet{` in the document and verify the following verb is third-person singular
 2. Check all subject-verb agreement patterns, especially with collective nouns and citation subjects
 3. Run the consistency rule (see above) on every error type found in the first pass
