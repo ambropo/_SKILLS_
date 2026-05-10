@@ -4,8 +4,8 @@
 
 ## Prerequisites
 
-- Read `prompt-references/verification-protocol.md` before running any checks.
-- Read `prompt-references/model-solving-conventions.md` for verification log format.
+- Read `~/.claude/preferences/verification-protocol.md` before running any checks.
+- Read `~/.claude/preferences/model-solving-conventions.md` for verification log format.
 
 ## Inputs
 

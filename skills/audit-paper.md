@@ -803,7 +803,7 @@ If the answer is **yes**, proceed to Module 6. If **no**, end the audit.
 
 This module is optional. Only proceed if the user says "move to next" or answers "yes" to the Module 6 question.
 
-**MANDATORY: Before starting this module, read the reference file `~/.claude/commands/prompt-references/writing-style-guidelines.md` and use it as your checklist.** Do not work from memory of what the guidelines say. Read the file.
+**MANDATORY: Before starting this module, read the reference file `~/.claude/preferences/writing-style-guidelines.md` and use it as your checklist.** Do not work from memory of what the guidelines say. Read the file.
 
 This module evaluates the paper's craft at a holistic level: opening strategy, pedagogical flow, narrative arc, and voice. Unlike Modules 2-5 (which check discrete elements), this module reads the paper as a unified argument and assesses whether it follows best practices in applied economics writing.
 
@@ -921,7 +921,7 @@ If the answer is **yes**, proceed to Module 7. If **no**, end the audit.
 
 This module is optional. Only proceed if the user says "move to next" or answers "yes" to the Module 7 question.
 
-**MANDATORY: Before starting this module, read the reference files `~/.claude/commands/prompt-references/humanizer-rules.md` and the "Negative Space" section of `~/.claude/commands/prompt-references/voice-profile-matray.md`. Use them as your checklist.** Do not work from memory of what the rules say. Read the files.
+**MANDATORY: Before starting this module, read the reference files `~/.claude/preferences/humanizer-rules.md` and the "Negative Space" section of `~/.claude/preferences/voice-profile-matray.md`. Use them as your checklist.** Do not work from memory of what the rules say. Read the files.
 
 This module scans the paper for language patterns that are characteristic of AI-generated text. These patterns may have entered the paper through AI-assisted drafting, or they may simply be habits that happen to overlap with AI style. Either way, a referee or reader who notices them will question the paper's authenticity. The goal is to flag every instance so the author can decide which to revise.
 

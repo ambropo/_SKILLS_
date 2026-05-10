@@ -26,10 +26,10 @@ SKILL.md (this file) — argument parsing, phase routing, checkpoint enforcement
   ├── references/oracle-prompts.md        — Oracle prompt templates
   └── references/example-walkthrough.md   — Concrete output pattern (collateral model)
 
-Shared prompt-references (read by sub-agents as needed):
-  ├── prompt-references/model-solving-conventions.md  — LaTeX templates
-  ├── prompt-references/verification-protocol.md      — Check procedures + parameter tables
-  └── prompt-references/latex-research.md             — General LaTeX conventions
+Shared preferences (read by sub-agents as needed):
+  ├── preferences/model-solving-conventions.md  — LaTeX templates
+  ├── preferences/verification-protocol.md      — Check procedures + parameter tables
+  └── preferences/latex-research.md             — General LaTeX conventions
 ```
 
 ## Phase 0: Argument Parsing

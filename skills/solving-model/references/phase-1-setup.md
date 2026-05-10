@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- Read `prompt-references/model-solving-conventions.md` before writing any LaTeX.
+- Read `~/.claude/preferences/model-solving-conventions.md` before writing any LaTeX.
 - On first invocation, also read `references/example-walkthrough.md` for a concrete output pattern.
 
 ## Inputs

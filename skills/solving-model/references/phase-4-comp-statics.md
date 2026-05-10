@@ -4,8 +4,8 @@
 
 ## Prerequisites
 
-- Read `prompt-references/model-solving-conventions.md` for table format.
-- Read `prompt-references/verification-protocol.md` for numerical checks.
+- Read `~/.claude/preferences/model-solving-conventions.md` for table format.
+- Read `~/.claude/preferences/verification-protocol.md` for numerical checks.
 
 ## Inputs
 

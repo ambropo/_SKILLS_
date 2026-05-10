@@ -13,8 +13,8 @@ Generate journal-calibrated referee reports that simulate the adversarial dynami
 
 Before any analysis, read both of these files in full using absolute paths. Do not proceed until both are loaded:
 
-1. `/Users/adrienmatray/.claude/commands/prompt-references/journal-profiles.md`
-2. `/Users/adrienmatray/.claude/commands/prompt-references/domain-profile.md`
+1. `~/.claude/preferences/journal-profiles.md`
+2. `~/.claude/preferences/domain-profile.md`
 
 These files contain journal-specific reviewer priorities and the referee disposition definitions you will use throughout this review.
 

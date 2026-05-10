@@ -4,8 +4,8 @@
 
 ## Prerequisites
 
-- Read `prompt-references/model-solving-conventions.md` for the `full_model.tex` skeleton.
-- Read `prompt-references/latex-research.md` for formatting conventions.
+- Read `~/.claude/preferences/model-solving-conventions.md` for the `full_model.tex` skeleton.
+- Read `~/.claude/preferences/latex-research.md` for formatting conventions.
 
 ## Inputs
 
@@ -62,7 +62,7 @@ Fill in:
 
 ## Step 2: Apply formatting conventions
 
-Read `prompt-references/latex-research.md` and apply:
+Read `~/.claude/preferences/latex-research.md` and apply:
 
 - **Wide tables:** Wrap in `\resizebox{1\linewidth}{!}{}` (only when needed — comparative statics table with many columns, or parameter table with long source strings)
 - **Table style:** `booktabs` throughout (`\toprule`, `\midrule`, `\bottomrule`)
