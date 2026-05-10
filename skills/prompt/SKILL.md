@@ -11,8 +11,8 @@ allowed-tools: ["Read", "Glob", "Grep", "Write", "Edit", "Bash", "Agent"]
 Format an informal request into a structured prompt, then execute it.
 
 ## Reference Files
-@~/.claude/commands/prompt-references/formatting-core.md
-@~/.claude/commands/prompt-references/roles.md
+@./references/formatting-core.md
+@./references/roles.md
 
 ## Input
 $ARGUMENTS
