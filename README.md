@@ -34,6 +34,7 @@ cp -r ~/claude-skills/skills/* ~/.claude/skills/
 | `/audit-paper` | Comprehensive paper audit (typos, grammar, style, apparatus, structure) |
 | `/audit-code` | Systematic code review against project conventions |
 | `/review-plan` | Stress-test any plan with structured expert critique |
+| `/review-plan-auto` | Automated iterative plan review with convergence detection and deterioration safeguards |
 | `/compile-latex` | Compile LaTeX documents, fix errors, re-compile until clean |
 | `/lit-review-verify` | Verify literature review claims against sources |
 | `/simulate-referee` | Simulate referee reports on a draft paper |
