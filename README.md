@@ -41,6 +41,8 @@ cp -r ~/claude-skills/skills/* ~/.claude/skills/
 | `/skill-creator` | Create, modify, and evaluate new skills |
 | `/pdf-chunker` | Reliable chunked extraction from PDF files |
 | `/overleaf` | Sync and compile Overleaf projects |
+| `/restart` | Snapshot the current session to `restart.md` before clearing context, so a fresh conversation can resume work |
+| `/memory` | Maintain a durable `PROJECT_MEMORY.md` at the project root (research question, decisions, data sources, workstreams, lessons) |
 
 ## Updating
 
