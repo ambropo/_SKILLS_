@@ -1,6 +1,6 @@
 ---
 name: simulate-referee
-description: Simulated peer review generating journal-calibrated referee reports with Editor + 2 referee structure. Use for pre-submission feedback on your own papers.
+description: Use when the user wants pre-submission feedback on their own paper via simulated peer review — journal-calibrated referee reports with an Editor + 2 referee structure. Triggers on "simulate referee", "simulate peer review", "what would a referee say", "pre-submission feedback", "fake referee report on my paper", or "/simulate-referee". Surfaces weaknesses before actual referees do.
 argument-hint: "[--journal AER|QJE|Econometrica|JFE|RFS] [path-to-paper]"
 allowed-tools: ["Read", "Glob", "Write", "Agent"]
 ---

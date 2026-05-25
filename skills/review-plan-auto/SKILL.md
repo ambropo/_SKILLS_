@@ -1,6 +1,6 @@
 ---
 name: review-plan-auto
-description: Automated iterative plan review with convergence detection. Runs the review-plan critique loop automatically until the plan has no critical issues, with safeguards against deterioration and circular changes. Surfaces upstream issues that plan revision cannot fix. Use instead of manually running /review-plan multiple times. Trigger when the user mentions iterative review, auto-review, reviewing a plan thoroughly, or wants multiple review passes without manual approval.
+description: Use when the user wants automated iterative plan review with convergence detection — multiple review passes without manual approval between iterations. Triggers on "auto-review the plan", "iterate on plan review", "review my plan thoroughly", "keep reviewing until it's tight", "/review-plan-auto", or any case where the user would otherwise run `/review-plan` repeatedly. Includes safeguards against deterioration, circular changes, and surfaces upstream issues that plan revision cannot fix.
 argument-hint: "[file:path] [role:\"...\"] [focus:dimension] [depth:quick|standard|deep] [max:N] [dryrun] [help]"
 allowed-tools: ["Read", "Glob", "Grep", "Write", "Edit", "Bash", "Agent", "WebSearch", "WebFetch"]
 ---

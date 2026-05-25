@@ -1,19 +1,18 @@
 ---
 name: audit-code
-description: Audit Stata dofiles for macro definitions, paths, code consistency, and unused variables. Use when user asks to audit code or dofiles.
-disable-model-invocation: false
-argument-hint: [path-to-dofiles-directory]
+description: Use when the user asks to audit, review, or check Stata dofiles for macro definitions, undefined paths, internal consistency, or unused variables. Triggers on "audit code", "audit dofiles", "check my Stata code", "audit my Stata project", or "/audit-code".
+argument-hint: "[path-to-dofiles-directory]"
 ---
 
-# CRITICAL WORKFLOW REQUIREMENTS
+# audit-code
 
-**YOU MUST FOLLOW THESE RULES. THEY ARE NON-NEGOTIABLE.**
+## Working principles
 
-**Work modularly.** Complete one module at a time. After each module, report the required output and wait for confirmation before proceeding.
+**Work modularly — one module at a time.** Stop after each module and wait for confirmation. Reason: code audits compound noise fast. If module 1 surfaces 30 issues and the user catches a false positive, you want to recalibrate before module 2 generates 30 more in the same wrong direction.
 
-**Be explicit about unknowns.** If you are uncertain about something, say so. Do not guess.
+**Flag unknowns explicitly instead of guessing.** Stata code is full of context-dependent behavior (locals vs globals, scoping inside `program`, version-specific defaults). A guess that sounds confident is worse than an unknown that prompts the user to clarify.
 
-**Report only problems.** If code is correct, say nothing about it. Never describe what you checked. Never explain that something is "already fine" or "no change needed."
+**Report only problems.** Don't list what you checked or what was already fine. The user already trusts that you ran the audit; padding the report with "Module 1: no issues found in `01_clean.do`" buries the actual findings.
 
 
 # Code Audit

@@ -1,6 +1,6 @@
 ---
 name: review-plan
-description: Stress-test a plan with structured expert critique, best-practice research, and optional fresh-context subagent review. Use after developing a plan or on any plan file to catch blind spots and missing steps.
+description: Use when the user wants to stress-test, critique, or pressure-check a plan document — catch blind spots, missing steps, and unstated assumptions. Triggers on "review my plan", "stress-test the plan", "critique this plan", "what am I missing", "expert review of the plan", or "/review-plan". Runs structured expert critique, best-practice research, and optional fresh-context subagent review.
 argument-hint: "[file:path] [role:\"...\"] [focus:dimension] [depth:quick|standard|deep] [dryrun] [help]"
 allowed-tools: ["Read", "Glob", "Grep", "Write", "Edit", "Bash", "Agent", "WebSearch", "WebFetch"]
 ---
