@@ -158,10 +158,10 @@ Two phases live in `references/` because they only fire when the author is doing
 
 | Phase | When it runs | Reference |
 |---|---|---|
-| Evals (test cases, baseline, running, iteration loop) | After the skill is drafted and the author wants to test it | `references/eval-workflow.md` |
-| Description optimization | After the skill is in good shape, to tune triggering accuracy | `references/description-optimization.md` |
+| Evals (test cases, baseline RED, running, iteration loop) | Throughout the RED → GREEN → REFACTOR loop. Load BEFORE the RED baseline (you need it to write test cases and run scenarios against a no-skill agent) | `references/eval-workflow.md` |
+| Description optimization | At the end, after the skill is in good shape, to tune triggering accuracy | `references/description-optimization.md` |
 
-Load the reference when you reach that phase, then follow its instructions verbatim. The authoring loop above (capture intent, frontmatter, anatomy, writing patterns, discipline-enforcing skills) is enough to draft a working skill; the references are for testing and polishing.
+Load each reference when you reach that phase, then follow its instructions verbatim. The authoring guidance inline above (capture intent, frontmatter, anatomy, writing patterns, discipline-enforcing skills) covers the *what to write*; `eval-workflow.md` covers the *how to test*.
 
 
 ---
@@ -220,6 +220,8 @@ Optional. For "is the new version actually better?", give two outputs to an inde
 - `agents/grader.md` — evaluating assertions against outputs
 - `agents/comparator.md` — blind A/B comparison
 - `agents/analyzer.md` — analyzing why one version beat another
+- `references/eval-workflow.md` — test cases, baseline, running and evaluating, iteration loop
+- `references/description-optimization.md` — 4-step description optimizer loop
 - `references/schemas.md` — JSON structures for `evals.json`, `grading.json`, `benchmark.json`
 - `references/persuasion-principles.md` — empirical basis (Cialdini; Meincke et al., 2025) for the discipline-enforcement levers
 - `references/testing-skills-with-subagents.md` — pressure-scenario design, pressure-type taxonomy, meta-testing, worked bulletproofing example
