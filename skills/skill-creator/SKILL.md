@@ -63,22 +63,35 @@ allowed-tools: ["Read", "Grep", "Glob", "Write", "Task"]
 
 ```
 skill-name/
-├── SKILL.md (required)
-│   ├── YAML frontmatter
-│   └── Markdown instructions
-└── (optional bundled resources)
-    ├── scripts/    — executable code for deterministic tasks
-    ├── references/ — docs loaded into context on demand
-    └── assets/     — files used in output (templates, icons)
+├── SKILL.md       (required)  routing + workflow
+├── gotchas.md     (optional)  failure modes the agent reads to catch itself
+├── templates/     (optional)  artifacts the skill EMITS verbatim or fills in
+├── references/    (optional)  prose the skill READS to understand
+├── scripts/       (optional)  executable code for deterministic tasks
+└── assets/        (optional)  static files used in output (icons, fonts)
 ```
 
 Three loading levels:
 
 1. **Metadata** (name + description) — always in context (~100 words).
-2. **SKILL.md body** — loaded when the skill triggers. Keep under 500 lines.
+2. **SKILL.md body** — loaded when the skill triggers. Target the range Anthropic skill examples cluster in (roughly 150–300 lines); past that, dispatch heavy content to subfolders. The signal is whether failure catalogues or worked examples are crowding out routing.
 3. **Bundled resources** — loaded on demand; scripts can run without being read into context.
 
-For multi-domain skills, split by variant (`references/aws.md`, `references/gcp.md`, …) and have SKILL.md route.
+Decide subfolder by what the agent does with the content:
+
+- **emit** → `templates/`  (HTML scaffold, .tex skeleton with placeholder sections, response-letter shell)
+- **read to understand** → `references/`  (schemas, principles, taxonomies, worked examples, rubric criteria)
+- **read to catch itself** → `gotchas.md`  (rationalization table, red-flags list, pressure-scenario failure notes)
+
+`scripts/` and `assets/` are orthogonal to this trichotomy: executable code and static output files. The emit/read/catch distinction applies to content the agent processes as prose.
+
+Boundary case: if the agent reads something to decide *what* to emit (a rubric it applies as a checklist), it's `references/`. If the agent copies the structure into output (a skeleton with section headers), it's `templates/`. A rubric printed verbatim is the rare both-case; file under `references/` and let the template reference it. Worked examples go in `references/` even if their structure is partially copied; templates are bare skeletons, examples are filled prose the agent learns from.
+
+Example: a paper-audit skill with seven failure modes and three rubrics lands at SKILL.md (routing + workflow), `gotchas.md` (rationalization table, red-flags list, observed failures from testing), `references/rubrics.md` (the three rubrics the agent reads), `templates/response-letter.tex` (the skeleton the agent fills in).
+
+For multi-domain skills, split references by variant (`references/aws.md`, `references/gcp.md`, …) and have SKILL.md route. Not every skill uses every subfolder.
+
+Existing skills predate this anatomy and need not be migrated unless touched.
 
 ### Writing patterns
 
@@ -133,6 +146,8 @@ All of these mean: stop, start over.
 ```
 
 Together: the foundational sentence forbids spirit-vs-letter arguments, the table names the excuses, the red-flags list lets the agent catch itself mid-rationalization. Without these, "always do X" gets eroded the first time the agent finds X inconvenient.
+
+If the rationalization table or Red Flags list grows past ~15 lines combined (heuristic, not a hard limit), hoist both to `gotchas.md` and replace the inline content with: `See gotchas.md — rationalization table and red-flags list.` Reason: rationalization catalogues compound as you observe new excuses; inlining them bloats SKILL.md on every trigger.
 
 **Deeper reading**: `references/persuasion-principles.md` covers the empirical basis (Cialdini, 2021; Meincke et al., 2025, N=28,000) for which persuasion levers — authority, commitment, scarcity, social proof, unity — actually move compliance in LLMs, and which to avoid (liking, reciprocity). Load it when writing a discipline-enforcing skill.
 
@@ -391,6 +406,7 @@ Same loop (draft → test → review → improve → repeat), but no subagents:
 - **Preserve the original name** (directory and frontmatter `name`). Don't append `-v2`.
 - **Copy to a writeable location before editing** (installed paths may be read-only). Work in `/tmp/skill-name/`, package from the copy.
 - If packaging manually, stage in `/tmp/` first, then move to the output directory.
+- **Check for hoist candidates.** If the skill has a Red Flags or rationalization-table section inline and those lines exceed 15 combined, propose hoisting them to `gotchas.md` per the threshold in Anatomy. State the current line count and the proposed split before editing.
 
 ---
 
