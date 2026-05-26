@@ -61,21 +61,6 @@ State this once; do not repeat in later modules.
 **Report only problems.** If text is correct, say nothing about it. Never describe what you checked. Never explain that something is "already fine" or "no change needed."
 
 
-# C. Paper Audit
-
-I want you to audit my academic paper (economics/finance).
-
-The audit should proceed in **seven** modules:
-
-- **Module 1 — Correctness**: Check for typos, misspelled words, and grammar issues
-- **Module 2 — Style**: Syntax improvements (light and deep), repetition detection
-- **Module 3 — Prose Quality** (optional): Sentence-level checks, paragraph discipline, and economics-specific writing patterns based on McCloskey's *Economical Writing*
-- **Module 4 — Apparatus** (optional): Audit of tables, figures, equations, and footnotes for standalone clarity
-- **Module 5 — Structure & Coherence** (optional): Paper-type classification, design-specific completeness, argument-move audit, and claims-evidence mapping
-- **Module 6 — Voice & Craft** (optional): Holistic craft review based on writing style guidelines — opening strategy, pedagogical flow, results presentation, literature positioning
-- **Module 7 — AI Pattern Detection** (optional): Scan for language patterns that signal AI-generated text, based on the humanizer anti-AI framework
-
-
 ## D. IMPORTANT: Understanding the Input Files
 
 ### LaTeX Format
@@ -135,7 +120,7 @@ For each correction, provide:
 
 **Do NOT use code blocks or blockquotes for Original/Suggested pairs.** Use bold labels (**Original:**, **Suggested:**) on their own line, with the text on the next line. Separate each suggestion from the next with a horizontal rule (`---`). **Reason:** and **Note:** labels MUST always be bold.
 
-**Example (single-line):**
+**Example:**
 
 **T3** (intro.tex, line 45)
 
@@ -145,21 +130,11 @@ For each correction, provide:
 **Suggested:**
 \paragraph{Problem.}
 
----
-
-**Example (multi-line with reason):**
-
-**S5** (intro.tex, lines 12-15)
-
-**Original:**
-This is the first sentence of the original text. And this is the second sentence that continues the thought. Here is a third line to illustrate.
-
-**Suggested:**
-This is the revised first sentence. The second sentence is now tighter. The third line is also improved.
-
-**Reason:** [brief explanation]
+**Reason:** [optional, brief]
 
 ---
+
+Each module file in `references/` shows the format applied to that module's labeling scheme.
 
 **Do NOT strip LaTeX commands.** If the original has `\textit{recieve}`, the correction should be `\textit{receive}`, not just `receive`.
 
@@ -195,44 +170,21 @@ Before starting any module, identify all files to audit:
 **HARD LIMIT: If your output is growing long, STOP and break it into chunks. It is always better to stop early and continue in the next response than to hit the output token limit. Aim for no more than ~40 suggestions per response.**
 
 
-## I. IMPLEMENTATION RULES: MODULE 1
+## I. IMPLEMENTATION RULES
 
-When I say **"implement correction XX"** (e.g., "implement T1, G3"), apply the change by **directly replacing** the original text with the corrected text.
+When the user says **"implement XX"** (e.g., "implement T1, S4, V2"), apply the change by directly replacing the original text with the corrected text. Always show the full corrected line(s) ready to copy-paste, preserve surrounding LaTeX, and provide file + line number.
 
-**Rules:**
+Markup depends on module + mode:
 
-1. Show the full corrected line(s) ready to copy-paste into the LaTeX source
-2. Preserve all surrounding LaTeX commands and formatting
-3. Provide the file name and line number(s) for reference
-4. **Do NOT use track-changes markup** (`\rsout{}`, `\red{}`, etc.) — just provide the clean corrected text
-
-
-## J. IMPLEMENTATION RULES: MODULES 2–4
-
-**IF CLEAN MODE** (`--clean` was specified):
-Same as Module 1 — directly replace with clean corrected text. No markup.
-
-**IF TRACK-CHANGES MODE** (default):
-Provide the full text with `\rsout{}` and `\red{}` markup ready to copy-paste. Since your suggestions already use this markup, implementation means providing the "Suggested" line with full context.
-
-**Rules:**
-
-1. Show the full implemented line(s) ready to copy-paste into the LaTeX source
-2. Preserve all surrounding LaTeX commands and formatting
-3. In track-changes mode: only mark the changed portion with `\rsout{}` and `\red{}`
-4. Provide the file name and line number(s) for reference
-
-
-## K. IMPLEMENTATION RULES: MODULES 5–7
-
-When the user says "implement" for items from Modules 5-7, the action depends on the item type:
-
-- **D-items (Design completeness):** Draft the missing content (e.g., a paragraph discussing the identifying assumption) and provide it ready to insert at the specified location.
-- **A-items (Argument structure):** Provide the restructured paragraph(s), split, moved, or trimmed as suggested.
-- **C-items (Claims-evidence):** Provide the corrected text with the missing reference added, or flag the orphan result for the user to decide.
-- **V-items Type A (Voice/craft text-level):** Provide Original/Suggested text pairs as in Modules 2-4, respecting the current mode (track-changes or clean).
-- **V-items Type B (Voice/craft structural):** Draft the new content and specify where it should be inserted.
-- **AI-items (AI pattern detection):** Provide Original/Suggested text pairs as in Modules 2-4.
+| Label | Module | Clean mode | Track-changes mode |
+|---|---|---|---|
+| T#, G# | 1 (Correctness) | clean text | clean text (Module 1 always clean) |
+| S#, R#, P#, Q# | 2-4 | clean text | `\rsout{}` / `\red{}` markup, full line |
+| V# Type A, AI# | 6, 7 (text-level) | clean text | `\rsout{}` / `\red{}` markup, full line |
+| D# (Design) | 5 | draft the missing content and specify insertion point | same |
+| A# (Argument) | 5 | provide restructured paragraph (split, move, trim) | same |
+| C# (Claims) | 5 | corrected text with missing reference added, or flag orphan | same |
+| V# Type B (structural) | 6 | draft new content + specify location | same |
 
 
 ---
@@ -251,11 +203,7 @@ The 7 modules live in `references/`. For each selected module (per `--modules` o
 | 6. Voice & Craft | `references/module-6-voice.md` |
 | 7. AI Pattern Detection | `references/module-7-ai-patterns.md` |
 
-**Default workflow:** Run Module 1 first, then prompt to continue. After Module 5 completes, ask whether to run Module 6. After Module 6, ask whether to run Module 7. The stop-and-wait language for each transition lives inside each module file.
-
-**Module 6 prerequisite:** read `~/.claude/preferences/writing-style-guidelines.md` before starting Module 6.
-
-**Module 7 prerequisite:** read `~/.claude/preferences/humanizer-rules.md` and the "Negative Space" section of `~/.claude/preferences/voice-profile-matray.md` before starting Module 7.
+**Default workflow:** Run Module 1 first, then prompt to continue. After Module 5 completes, ask whether to run Module 6. After Module 6, ask whether to run Module 7. The stop-and-wait language and any external file prerequisites (writing-style guidelines for Module 6, humanizer rules for Module 7) live inside each module file.
 
 
 ---
@@ -317,11 +265,3 @@ When you find ANY error, immediately search the entire document for:
 
 This prevents inconsistent corrections and missed duplicates.
 
-### Second-pass requirement (Module 1 only)
-
-Within Module 1, after your first pass through the document, do a second pass applying the systematic checks below. The first pass catches obvious errors; the second pass catches errors that require careful analysis.
-
-**Second-pass mandatory checks:**
-1. Search for every `\citet{` in the document and verify the following verb is third-person singular
-2. Check all subject-verb agreement patterns, especially with collective nouns and citation subjects
-3. Run the consistency rule (see above) on every error type found in the first pass
