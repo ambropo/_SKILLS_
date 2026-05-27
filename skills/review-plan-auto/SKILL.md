@@ -1,6 +1,6 @@
 ---
 name: review-plan-auto
-description: Use when the user wants automated iterative plan review with convergence detection — multiple review passes without manual approval between iterations. Triggers on "auto-review the plan", "iterate on plan review", "review my plan thoroughly", "keep reviewing until it's tight", "/review-plan-auto", or any case where the user would otherwise run `/review-plan` repeatedly. Includes safeguards against deterioration, circular changes, and surfaces upstream issues that plan revision cannot fix.
+description: Use when the user wants automated iterative plan review with convergence detection (multiple review passes without manual approval between iterations) OR wants to audit a plan's adversarial-agent contract (check that Adversary, Verifier, audit-readiness, or determinism agents are wired always-on, not conditionally gated). Triggers on "auto-review the plan", "iterate on plan review", "review my plan thoroughly", "keep reviewing until it's tight", "/review-plan-auto", "check whether my adversarial agents will actually fire", "audit how the plan wires the Adversary", "stress-test the safety machinery in my plan", "is this plan safe for an overnight run", "verify the plan's adversarial-agent contract", "make sure the Adversary in this plan is not just a deterministic check", or any case where the user would otherwise run `/review-plan` repeatedly. Includes safeguards against deterioration, circular changes, and surfaces upstream issues that plan revision cannot fix.
 argument-hint: "[file:path] [role:\"...\"] [focus:dimension] [depth:quick|standard|deep] [max:N] [dryrun] [help]"
 allowed-tools: ["Read", "Glob", "Grep", "Write", "Edit", "Bash", "Agent", "WebSearch", "WebFetch"]
 ---
@@ -97,7 +97,7 @@ Use the Agent tool with `subagent_type="general-purpose"` and a prompt containin
 5. Prior-pass issue summary (compact: labels + statuses only, not full critique text)
 6. Required output format
 
-**The 6 review dimensions:**
+**The 7 review dimensions:**
 
 1. **Pre-mortem** — "It's 3 months later and this plan failed. What were the top 3 causes?"
 2. **Completeness** — What's missing that a domain expert would expect?
@@ -105,6 +105,7 @@ Use the Agent tool with `subagent_type="general-purpose"` and a prompt containin
 4. **Best-practice alignment** — How does this compare to standards from the research?
 5. **Sequencing** — Are there hidden blockers? Would reordering reduce risk?
 6. **Specificity** — Could someone unfamiliar execute each step?
+7. **Adversarial-agent contract** — Conditional, fires only when the plan mentions Adversary / Verifier / audit-readiness / determinism / sensitivity / robustness agents. Apply the detection patterns in `~/.claude/preferences/adversarial-agent-contract.md`: (a) flag conditional-gating language within 20 lines of any agent specification block (`if `, `only when `, `gated by `, `conditional on `, `skip when`) UNLESS a sibling `cannot_do_job:` block appears within the same window; (b) require a closed `slo_enum` YAML block at the top of the plan body declaring the allowed `slo_status` and per-predicate verdict values, plus a `role_invocation_audit.json` emission at finalization; (c) require the cost-benefit push-back to be present in the plan's rationale section, naming the specific failure modes each committed agent catches in THIS task (not generic citations); (d) confirm that every Adversary, Verifier, audit-readiness, or determinism spec declares its dispatch mode (Task vs inline) and that no fallback is documented. Each violation is a [Red] [Plan-fixable] issue. If the plan does not mention any of the trigger terms, this dimension reports "n/a" and contributes nothing to the score.
 
 **Upstream/plan-fixable classification instruction (include in subagent prompt):**
 
