@@ -6,7 +6,7 @@ allowed-tools: ["Read", "Glob", "Grep", "Write", "Edit", "Bash", "Agent", "WebSe
 ---
 # Automated Plan Review
 
-*v1.0 — Iterative plan review with convergence-based stopping, deterioration detection, and upstream-fix classification*
+*v1.1 — Iterative plan review with convergence-based stopping, deterioration detection, and upstream-fix classification. Each pass fans out the dimensions across parallel subagents, then generates one coherent revision*
 
 Runs the structured plan critique loop automatically (up to N passes) until the plan has no critical issues. Each pass uses a fresh-context subagent to avoid planner bias. Detects circular changes and surfaces issues that belong upstream rather than in the plan.
 
@@ -70,7 +70,7 @@ Extract the plan's primary domain and approach. Build web search queries:
 | `standard` | 2 (queries A + B) |
 | `deep` | 3-4 (all queries) |
 
-Distill into 3-5 key principles relevant to this plan. These are reused across all passes (no repeat research).
+Issue the searches as parallel calls in a single message (they are independent), so the round-trips overlap instead of running one at a time. Then distill into 3-5 key principles relevant to this plan. These are reused across all passes (no repeat research).
 
 ### Step 4: Automated Review Loop
 
@@ -86,16 +86,20 @@ Distill into 3-5 key principles relevant to this plan. These are reused across a
 
 **Loop body — repeat until exit condition:**
 
-#### 4a. Launch fresh-context critique
+#### 4a. Fresh-context critique (parallel fan-out)
 
-Use the Agent tool with `subagent_type="general-purpose"` and a prompt containing:
+**Why fan out:** The review dimensions are independent, so one serial subagent covering all of them makes each pass as slow as the sum of every dimension. Dispatch one subagent per dimension in a single message instead; per-pass wall-clock collapses to the slowest single dimension. The loop across passes stays sequential, since each pass needs the prior pass's revised plan.
+
+In a single message, dispatch one `Agent` call (`subagent_type="general-purpose"`) per active dimension. Each per-dimension prompt contains:
 
 1. The full `current_plan` text
 2. The 3-5 best practices from Step 3
-3. The 6 review dimensions (listed below)
+3. EXACTLY ONE of the dimensions below (its definition)
 4. The upstream/plan-fixable classification instruction
-5. Prior-pass issue summary (compact: labels + statuses only, not full critique text)
-6. Required output format
+5. Prior-pass issue summary (compact: labels + statuses only, not full critique text) so labels stay consistent across passes
+6. The per-dimension critique output format
+
+Dimension 7 is conditional: include its subagent only when the plan mentions Adversary / Verifier / audit-readiness / determinism / sensitivity / robustness agents. Otherwise dispatch the 6 core dimensions and treat dimension 7 as "n/a".
 
 **The 7 review dimensions:**
 
@@ -116,10 +120,8 @@ Use the Agent tool with `subagent_type="general-purpose"` and a prompt containin
 > Examples of upstream issues: folder names use mixed conventions (backslash vs underscore vs space), input data arrives in inconsistent formats, a dependency has not been configured yet, a decision by another team is pending.
 > Examples of plan-fixable issues: a step is missing, instructions are vague, sequencing creates a hidden blocker, no contingency for a known risk.
 
-**Required subagent output format:**
+**Per-dimension critique output format (each subagent returns findings for its dimension only):**
 
-> Return your review in this exact structure:
->
 > STRENGTHS
 > 1. [Label] — [Explanation]
 >
@@ -128,21 +130,23 @@ Use the Agent tool with `subagent_type="general-purpose"` and a prompt containin
 > [Yellow] [Upstream] [Short-Label] — [Issue] → Root cause: [Explanation]
 > [Green] [Plan-fixable] [Short-Label] — [Issue] → Fix: [Recommendation]
 > (Use consistent short labels across passes so issues can be tracked.)
->
-> VERDICT
-> APPROVE — [Rationale]
->   OR
-> REVISE — [Rationale]. See revised plan below.
->
-> REVISED PLAN (only if REVISE)
-> [Complete revised plan text with [CHANGED] and [NEW] markers on modified/added sections]
 
-**Subagent fallback:** If the subagent fails (timeout, error), perform the review inline using this critic stance:
+**Fan-out fallback:** If subagent dispatch isn't available, or any per-dimension dispatch fails, perform the full-dimension critique inline using this critic stance:
 > You are now the critic, not the planner. Do not rationalize. Your job is to find what's missing, what will break, and what's wishful thinking.
+
+#### 4a-ii. Synthesize critique
+
+Merge the per-dimension findings into one consolidated review: collect strengths, dedupe overlapping issues across dimensions, normalize short labels against the prior-pass labels so the same issue keeps the same label, and sort by severity. Then set the verdict:
+- **APPROVE** if no Red plan-fixable issues remain.
+- **REVISE** otherwise.
+
+#### 4a-iii. Generate revision (only if REVISE)
+
+Dispatch a single `Agent` call (`subagent_type="general-purpose"`), given the full `current_plan` and the consolidated WEAKNESSES & GAPS from 4a-ii, instructed to return the complete revised plan with [CHANGED] and [NEW] markers on modified or added sections. Do not address [Upstream] items in the revision. Keeping revision as one coherent pass (rather than fanning it out per dimension) prevents conflicting edits to the same plan sections.
 
 #### 4b. Parse results
 
-From the subagent output, extract:
+From the synthesized critique (4a-ii) and the generated revision (4a-iii), extract:
 - Red plan-fixable items (with labels)
 - Yellow plan-fixable items (with labels)
 - Green items (noted but not scored)
@@ -193,13 +197,13 @@ If an exit condition is met, proceed to Step 5.
 #### 4g. Apply revision and loop
 
 If no exit condition is met and the verdict is REVISE:
-1. Take the subagent's complete REVISED PLAN output
+1. Take the complete REVISED PLAN output from 4a-iii
 2. Replace `current_plan` wholesale (no selective merge)
 3. If NOT in plan mode and the plan source is a file, write the updated plan to the file
 4. Increment `pass_number`
 5. Return to 4a
 
-If the verdict is APPROVE but Red items remain (the subagent missed them), override the verdict and continue the loop. Trust the score over the subagent's verdict when they disagree.
+If synthesis ever yields APPROVE while Red items remain, override the verdict and continue the loop. Trust the score over the verdict when they disagree.
 
 #### Budget warning
 

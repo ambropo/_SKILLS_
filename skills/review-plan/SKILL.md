@@ -6,7 +6,7 @@ allowed-tools: ["Read", "Glob", "Grep", "Write", "Edit", "Bash", "Agent", "WebSe
 ---
 # Plan Review
 
-*v1.1 — Stress-test a plan with structured expert critique, best-practice research, and optional fresh-context subagent review*
+*v1.2 — Stress-test a plan with structured expert critique, best-practice research, and parallel fresh-context subagent review*
 
 Stress-test a plan with structured expert critique, web research on best practices, and a revised version if needed. Use after developing a plan, or on any plan file. Catches blind spots, missing steps, and wishful thinking.
 
@@ -67,25 +67,33 @@ Extract the plan's primary domain and approach. Build web search queries:
 | `standard` | 2 (queries A + B) |
 | `deep` | 3-4 (all queries) |
 
-Distill into 3-5 key principles relevant to this plan.
+Issue the searches as parallel calls in a single message (they are independent), so the round-trips overlap instead of running one at a time. Then distill into 3-5 key principles relevant to this plan.
 
-### Step 4: Structured Review
+### Step 4: Structured Review (parallel fan-out)
+
+**Why fan out:** The 6 dimensions are independent — sequencing analysis does not depend on completeness analysis. One serial subagent reviewing all 6 makes wall-clock equal to the sum of all 6. Dispatching one subagent per dimension in a single message collapses wall-clock to the slowest single dimension, with no loss of rigor: each reviewer still sees the full plan.
 
 **Why fresh-context review matters:** If you wrote or helped develop the plan, you carry planner bias — you're more likely to rationalize gaps than catch them. A fresh-context reviewer sees the plan cold, the way a colleague or referee would.
 
-**Fresh-context review (preferred):**
-Launch a subagent to perform the critique. This avoids the bias of reviewing your own plan.
-
-Use the Task tool with `subagent_type="general-purpose"` and a prompt containing:
+**Fresh-context parallel review (preferred):**
+In a single message, dispatch one `Agent` call per dimension (`subagent_type="general-purpose"`) so they run concurrently. This avoids planner bias and runs the dimensions in parallel. Each per-dimension prompt contains:
 - The full plan text
-- The 6 review dimensions listed below
 - The best practices distilled from Step 3
-- Instructions to return findings in Red/Yellow/Green format (see classification below)
+- EXACTLY ONE of the 6 dimensions below (its definition and the critic stance)
+- The classification rule (Red/Yellow/Green)
+- Instruction to return findings for that dimension only, in this format:
 
-If the subagent returns results, incorporate them into the output in Step 5.
+> STRENGTHS (for this dimension, if any)
+> 1. [Label] — [Explanation]
+> WEAKNESSES & GAPS
+> [Red] [Label] — [Issue] → Fix: [Recommendation]
+> [Yellow] [Label] — [Issue] → Fix: [Recommendation]
+> [Green] [Label] — [Issue] → Fix: [Recommendation]
+
+**Synthesis:** Once all subagents return, merge their findings — collect strengths, dedupe overlapping issues across dimensions, and sort by severity (Red → Yellow → Green). This consolidated set feeds Step 5.
 
 **Inline review (fallback):**
-If subagent dispatch isn't available or fails, perform the review inline using the critic stance below.
+If subagent dispatch isn't available, or any per-dimension dispatch fails, perform the review inline across all 6 dimensions using the critic stance below.
 
 **CRITIC STANCE:**
 > You are now the critic, not the planner. Do not rationalize. Your job is to find what's missing, what will break, and what's wishful thinking.
