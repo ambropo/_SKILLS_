@@ -1,0 +1,78 @@
+\documentclass[12pt]{article}
+\usepackage{makeidx}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{setspace}
+\usepackage[hmargin={1.3in,1.3in},vmargin={1in,1in}]{geometry}
+\usepackage{graphicx}
+\usepackage[shortlabels]{enumitem}
+\usepackage{mathpazo}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{pagecolor}
+\usepackage[colorlinks]{hyperref}
+
+\setlength{\parskip}{.25cm}
+\setcounter{secnumdepth}{3}
+\graphicspath{{./graphics/}}
+
+%---- Define Solarized-like colors (night mode) ---
+\definecolor{NightBG}{RGB}{3,43,54}          
+\definecolor{NightFG}{RGB}{180,190,192}
+\newif\ifnightmode
+\AtBeginDocument{%
+  \ifnightmode
+    \pagecolor{NightBG}
+    \color{NightFG}
+    \hypersetup{
+      linkcolor=NightFG,
+      citecolor=NightFG,
+      urlcolor=NightFG
+    }
+  \else
+    \pagecolor{white}
+    \color{black}
+  \fi
+}
+%---------------------------------------------------
+%\nightmodetrue
+%---------------------------------------------------
+
+\begin{document}
+
+
+\thispagestyle{empty}
+\setstretch{1}
+\setlength{\parindent}{0pt}
+
+\setlist{topsep=0cm, itemsep=0.15cm}
+
+\begin{flushright}
+	\today
+\end{flushright}
+
+\bigskip
+\bigskip
+\bigskip
+
+Dear Ben,
+
+Thank you for giving me the opportunity to review this paper for the \textit{American Economic Review}, and apologies for the slight delay in returning my report.
+
+The paper addresses a timely and policy-relevant question: how should monetary policy respond to persistent supply disruptions modeled as regime switches rather than transitory shocks? The computational approach---extending deep equilibrium nets to handle Markov switching---is ambitious, and some of the results (particularly the ``bygones are bygones'' characterization of optimal policy under commitment) are interesting.
+
+I do, however, have several concerns. First, the economic interpretation of ``supply regimes'' remains thin; the reduced-form cost-push specification abstracts from the mechanisms through which tariffs, wars, or fragmentation would affect the economy (main comment 1). Second, the model abstracts from endogenous real-side adjustment (main comment 2), and the precautionary-savings channel driving natural rates appears fragile to alternative assumptions \textbf{}(main comment 3). Third, the quantitative results appear sensitive to calibration choices not well disciplined by data (main comment 5). Finally, even suggestive empirical evidence would strengthen the paper's contribution (main comment 7).
+
+Small note: The deep learning methodology is not my area of specialty, but I would have appreciated more accuracy checks and comparisons with alternative methods (main comment 6).
+
+A more detailed discussion of these points, along with several additional comments, is included in my referee report.
+
+In sum, the paper tackles an important question with an innovative computational approach, but the thin economic foundations, limited calibration discipline, and absence of empirical engagement leave me uncertain about its broader contribution. For these reasons, I recommend \textit{rejection}.
+
+I hope this letter, along with my report, will help you in making a decision on the manuscript.
+
+Best regards,\newline
+Ambrogio
+
+
+\end{document}

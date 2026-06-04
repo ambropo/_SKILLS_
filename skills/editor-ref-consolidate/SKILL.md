@@ -1,10 +1,10 @@
 ---
-name: ref-consolidate
-description: Use when the user wants to consolidate, summarise, or compare referee reports for a manuscript. Triggers on "consolidate the referee reports", "summarise referee comments", "what do the referees say", "merge the referee reports", or "/ref-consolidate".
+name: editor-ref-consolidate
+description: Use when the user wants to consolidate, summarise, or compare referee reports for a manuscript. Triggers on "consolidate the referee reports", "summarise referee comments", "what do the referees say", "merge the referee reports", or "/editor-ref-consolidate".
 argument-hint: "[manuscript-folder or path to referee files]"
 ---
 
-# ref-consolidate
+# editor-ref-consolidate
 
 ## Inputs
 

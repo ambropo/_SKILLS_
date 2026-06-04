@@ -1,10 +1,10 @@
 ---
-name: eer-draft-letters
-description: Use when the user wants to draft EER decision letters, assess a manuscript, analyse referee reports, or prepare an R&R or rejection letter for the European Economic Review. Triggers on "draft the letters", "write the decision letter", "draft R&R letter", "draft rejection letter", "assess this manuscript", or "/eer-draft-letters".
+name: editor-draft-letters
+description: Use when the user wants to draft EER decision letters, assess a manuscript, analyse referee reports, or prepare an R&R or rejection letter for the European Economic Review. Triggers on "draft the letters", "write the decision letter", "draft R&R letter", "draft rejection letter", "assess this manuscript", or "/editor-draft-letters".
 argument-hint: "[manuscript-folder or path to manuscript + referee files]"
 ---
 
-# eer-draft-letters
+# editor-draft-letters
 
 ## Inputs
 

@@ -1,0 +1,109 @@
+\documentclass[12pt]{article}
+\usepackage{makeidx}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{setspace}
+\usepackage[hmargin={1.3in,1.3in},vmargin={1in,1in}]{geometry}
+\usepackage{graphicx}
+\usepackage[shortlabels]{enumitem}
+\usepackage{mathpazo}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{pagecolor}
+\usepackage[colorlinks]{hyperref}
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{.25cm}
+\setcounter{secnumdepth}{3}
+\graphicspath{{./graphics/}}
+
+%---- Define Solarized-like colors (night mode) ---
+\definecolor{NightBG}{RGB}{3,43,54}          
+\definecolor{NightFG}{RGB}{180,190,192}
+\newif\ifnightmode
+\AtBeginDocument{%
+\ifnightmode
+\pagecolor{NightBG}
+\color{NightFG}
+\hypersetup{
+	linkcolor=NightFG,
+	citecolor=NightFG,
+	urlcolor=NightFG
+}
+\else
+\pagecolor{white}
+\color{black}
+\fi
+}
+%---------------------------------------------------
+%\nightmodetrue
+%---------------------------------------------------
+
+
+
+
+
+
+\begin{document}
+\setstretch{1.2}
+
+\section*{Referee Report on ``Monetary Policy with Supply Regimes''}
+
+The paper analyzes optimal monetary policy in a New Keynesian model where supply disturbances take the form of persistent Markov-switching regimes rather than transitory shocks. Using deep learning methods to solve the model globally, the authors show that under commitment the central bank accommodates inflation upon entry into a high-cost regime without reversing past price increases (``bygones are bygones''), while under discretion a regime-dependent inflationary bias emerges. The paper also demonstrates that standard Taylor rules fail when regime shifts alter the natural rate, and extends the analysis to state-dependent pricing. 
+
+The topic is timely and the computational approach is ambitious, but several concerns limit the paper's contribution in its current form.
+
+\medskip
+
+\textbf{Major Comments}
+
+\begin{enumerate}
+
+\item \textit{Economic interpretation of supply regimes.}
+The notion of a ``supply regime'' is reduced to a shift in the mean of a cost-push shock. While clearly stated, the economic interpretation remains thin. Very different phenomena---wars, tariffs, regulation, geopolitical fragmentation---are mapped into the same reduced-form labor wedge. Which economic margins are captured and which are abstracted from? Many motivating examples would plausibly operate through productivity, markups, sectoral reallocation, or trade structure rather than a uniform cost-push term. Would the policy implications differ if the underlying mechanism were specified more concretely?
+x
+\item \textit{Absence of endogenous real adjustment.}
+The model abstracts from endogenous real-side responses to persistent supply regimes: capital accumulation, entry and exit, sectoral reallocation, and trade adjustment are absent. As a result, ``bad times'' are sustained purely by expectations and policy. To what extent do the regime-dependent inflation bias and natural-rate results reflect this assumption rather than robust features of persistent supply disruptions?
+
+\item \textit{Fragility of the precautionary-savings channel.}
+The mechanism driving regime-dependent natural rates relies on a representative agent, a single risk-free asset in zero net supply, and no fiscal adjustment. If government debt could expand to absorb precautionary savings, or if countercyclical fiscal policy provided insurance against regime shifts, the natural rate dynamics could differ substantially. How robust would this channel be in richer environments---for instance, HANK models or economies with active fiscal policy? Given the emphasis placed on this mechanism, more discussion of its limitations seems warranted.
+
+\item \textit{Regimes versus persistent shocks.}
+A central motivation is the distinction between Markov-switching regimes and highly persistent autoregressive shocks. While the paper shows that very persistent AR(1) shocks do not replicate the bimodality induced by regimes, the economic intuition for why agents should treat these environments so differently is not fully developed. Is this a deep economic difference or primarily a modeling choice tied to discrete state transitions? Clarifying what is fundamentally new about regimes, beyond extreme persistence, would strengthen the contribution.
+
+\item \textit{Calibration concerns.}
+The calibration of regime durations (roughly 12 years for normal times and 6 years for bad times) appears largely ad hoc. Small changes in transition probabilities seem to generate large nonlinear effects (Figure 10), raising questions about quantitative robustness. Additionally, the regime shock is calibrated to exactly offset the optimal labor subsidy in bad times---an analytically convenient but economically special case. How sensitive are the main results to deviations from this knife-edge calibration?
+
+\item \textit{Deep learning methodology: transparency and validation.}
+The deep equilibrium nets approach is powerful but comes at the cost of transparency. It is difficult to assess which results are driven by economics versus numerical approximation choices (network architecture, loss weighting, training stability). The paper provides limited discussion of accuracy checks or comparisons with alternative global solution methods in simpler cases. Given the centrality of the computational contribution, more extensive validation seems necessary.
+
+\item \textit{Testable implications and empirical relevance.}
+The framework delivers several sharp qualitative implications: bimodality in macro variables, regime-dependent anchoring of inflation expectations, and non-standard co-movement of inflation and real rates across regimes. However, the paper does not articulate how these predictions could be brought credibly to the data or falsified. Even reduced-form evidence---regime-switching VAR analysis or event studies around large supply disruptions---would help assess empirical plausibility.
+
+\end{enumerate}
+
+\textbf{Minor Comments}
+
+\begin{enumerate}
+
+\item \textit{Relation to existing literature.}
+Several qualitative results resemble known insights once one allows for distorted steady states and persistent shocks: inflationary bias under discretion, failures of simple Taylor rules when the natural rate shifts, and ``bygones are bygones'' as persistence increases. The regime-switching framework sharpens these results, but the paper sometimes overstates conceptual novelty. A clearer articulation of what is genuinely new versus what is recombined in a nonlinear, global setting would be helpful.
+
+\item \textit{Zero lower bound.}
+Given the focus on optimal monetary policy, the absence of any discussion of the zero lower bound is surprising. How would the policy conclusions change if this constraint were imposed?
+
+\item \textit{Perfect regime observability.}
+The analysis assumes policymakers perfectly observe the regime and can condition policy on it. In practice, identifying whether the economy has entered a persistent supply regime is itself a central challenge. The abstraction from learning, misperception, or regime uncertainty limits the realism of the policy conclusions.
+
+\item \textit{Operationalizability of the modified Taylor rule.}
+The recommendation that Taylor rules should adjust their intercept to track a regime-contingent natural rate risks being tautological. Since the natural rate is defined in a counterfactual flexible-price economy, how could such a rule be operationalized in practice?
+
+\item \textit{Welfare analysis.}
+The paper emphasizes inflation and output dynamics but provides limited quantitative welfare comparisons across policy regimes. This makes it difficult to assess the economic magnitude of the policy prescriptions.
+
+\item \textit{Open economy considerations.}
+Many motivating examples---tariffs, geopolitical fragmentation, energy price shocks---have important international dimensions. Could the authors comment on how the closed-economy assumption might affect their conclusions?
+
+\end{enumerate}
+
+\end{document}
