@@ -6,9 +6,23 @@ argument-hint: "[path-to-file or directory]"
 
 # edit-matlab
 
+## Output format (required every time)
+
+Return output in exactly this structure — do not omit any section:
+
+**1. Edited file** (or edited scope if partial)
+
+**2. Change summary:** what was added or corrected; any header fields updated; any blocks where intent was uncertain
+
+**3. Verification report:** confirm you scanned the full edited scope line by line. For every blank line followed by executable code, confirm a `%` comment appears immediately before it. State how many violations were found and fixed (or "none found").
+
+If there are no flags, write "None."
+
+---
+
 ## Working principles
 
-**Process section by section.** Read the full file, identify all sections, then edit each section in turn using the `Edit` tool. Never rewrite the entire file in one shot — apply changes incrementally so each edit is targeted and reviewable. Return a brief change summary at the end.
+**Process section by section.** Read the full file, identify all sections, then edit each section in turn using the `Edit` tool. Never rewrite the entire file in one shot — apply changes incrementally so each edit is targeted and reviewable.
 
 **Comments only — never touch executable code.** You may freely add, correct, or restructure comments, headers, and formatting. Do not modify executable code unless the user explicitly asks.
 
@@ -165,14 +179,21 @@ Place below the section/subsection header and description, before the first bloc
 
 ## NOTES TO FIG/TAB blocks
 
-Required for every figure/table-producing block. Place below the `%` block comment, before the code.
+Required for every figure/table-producing block. Place below the `%` block comment, before the figure/table code — outside any loop, not inside it.
 
 ```matlab
+% Open figure and loop over responses
 %....... NOTES TO FIG/TAB .......
 % What is shown, sample/time period, key construction details,
 % meaning of lines/colors/panels, data sources.
 %..................................
+figure;
+for ii = 1:nvar
+    ...
+end
 ```
+
+Do not place the NOTES TO FIG/TAB block inside the loop body.
 
 ---
 

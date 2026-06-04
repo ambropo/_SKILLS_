@@ -6,9 +6,21 @@ argument-hint: "[path to notes file or paste text]"
 
 # edit-lecture
 
+## Output format (required every time)
+
+Return output in exactly this structure — do not omit any section:
+
+**1. Revised text (paste-ready)**
+
+**2. Change log:** what was changed; any substantive meaning changes; any steps inserted that were not in the original
+
+**3. Open issues / flags:** steps flagged as skipped; factual or logical risks; anything requiring the author's decision. If none, write "None."
+
+---
+
 ## Working principles
 
-**Process section by section.** Read the full document, identify sections, edit each in turn using the Edit tool. Return the revised text with a brief change log.
+**Process section by section.** Read the full document, identify sections, edit each in turn using the Edit tool. Return the revised text with the change log above.
 
 **Completeness over compression.** Every derivation step must be shown. If a step is omitted for space, flag it explicitly: e.g. *[algebra: collect terms in B(L)]*. Do not compress to the point that logic becomes implicit.
 
@@ -24,7 +36,15 @@ MSc students (near-PhD level) building their understanding from the ground up. E
 
 ## Editing rules
 
-**Intuition alongside mechanics.** Always pair algebra with intuition: introduce the economic intuition first, then formalise. Never present an equation without explaining what it says in words. Rule of thumb: explain *what moves what, why, and so what* — then show it in the algebra.
+**Intuition before algebra — strictly.** For every equation, write one sentence of intuition *immediately before* the equation. Do not defer all intuition to a summary block at the end of the section — that does not satisfy this rule. The required pattern is:
+
+> [one intuition sentence] → [equation] → [explanation of terms]
+
+Example:
+> OLS finds the projection of y onto the column space of X. Formally: β̂ = (X'X)⁻¹X'y. Here, (X'X)⁻¹ scales by the spread of the regressors.
+
+What to avoid:
+> β̂ = (X'X)⁻¹X'y. [...10 lines of algebra...] **Intuition:** OLS projects y onto the column space of X.
 
 **Jargon.** Every technical object requires: (1) a one-line definition, (2) a one-line intuition, (3) a worked example or mapping to notation.
 
@@ -36,22 +56,26 @@ MSc students (near-PhD level) building their understanding from the ground up. E
 
 ---
 
-## Default structure for a new derivation
+## Default structure for a new derivation or section
 
-1. Motivation — why this result matters
-2. Setup / assumptions — all stated plainly, before algebra begins
-3. Derivation — step by step, each line explained in words
-4. Intuition — what the result means economically
-5. Special cases / comparative statics
-6. Common mistakes / pitfalls
-7. Summary — one short paragraph, no new information
+Use this structure whenever adding a new derivation, completing an existing one, or adding a new section. All 7 steps are required. If a step has nothing substantive to say, write one sentence explaining why (e.g. "No non-trivial special cases arise here") rather than omitting it.
+
+1. **Motivation** — why this result matters
+2. **Setup / assumptions** — all stated plainly, before algebra begins
+3. **Derivation** — step by step; each line preceded by one intuition sentence
+4. **Intuition** — what the result means economically (section-level, beyond inline intuition)
+5. **Special cases / comparative statics**
+6. **Common mistakes / pitfalls**
+7. **Summary** — one short paragraph, no new information
 
 ---
 
-## Output format
+## Pre-delivery checklist
 
-**1. Revised text (paste-ready)**
+Before returning output, confirm:
 
-**2. Change log:** what was changed; any substantive meaning changes; any steps inserted that were not in the original
-
-**3. Open issues / flags:** steps flagged as skipped; factual or logical risks
+- [ ] Every equation is preceded by one intuition sentence (not a block at the end)
+- [ ] For new or completed derivations: all 7 structural steps present
+- [ ] Change log written and complete
+- [ ] Open issues / flags section present (even if "None")
+- [ ] Notation consistent throughout

@@ -6,9 +6,23 @@ argument-hint: "[path-to-dofile or directory]"
 
 # edit-stata
 
+## Output format (required every time)
+
+Return output in exactly this structure — do not omit any section:
+
+**1. Edited file** (or edited scope if partial)
+
+**2. Change summary:** what was added or corrected; any header fields updated; any blocks where intent was uncertain
+
+**3. Verification report:** confirm you scanned the full edited scope line by line. For every empty line followed by executable code (not a section/subsection header), confirm a `****` comment appears immediately above it. State how many violations were found and fixed (or "none found").
+
+If there are no flags, write "None."
+
+---
+
 ## Working principles
 
-**Process section by section.** Read the full file, identify all sections, then edit each section in turn using the `Edit` tool. Never rewrite the entire file in one shot — apply changes incrementally so each edit is targeted and reviewable. Return a brief change summary at the end.
+**Process section by section.** Read the full file, identify all sections, then edit each section in turn using the `Edit` tool. Never rewrite the entire file in one shot — apply changes incrementally so each edit is targeted and reviewable.
 
 **Comments only — never touch executable code.** You may freely add, correct, or restructure comments, headers, and formatting. Do not modify executable code unless the user explicitly asks.
 
