@@ -45,6 +45,15 @@ cp -r ~/claude-skills/skills/* ~/.claude/skills/
 | `/restart` | Snapshot the current session to `restart.md` before clearing context, so a fresh conversation can resume work |
 | `/memory` | Maintain a durable `PROJECT_MEMORY.md` at the project root (research question, decisions, data sources, workstreams, lessons) |
 
+## Global Configuration
+
+A global [`CLAUDE.md`](CLAUDE.md) lives in this folder and is symlinked to `~/.claude/CLAUDE.md`.
+It sets baseline research assistant standards (verification, reproducibility, academic style) that apply to every Claude Code session, in every project.
+
+Project-level `CLAUDE.md` files (e.g. in `VAR_Toolbox/`) stack on top of this baseline and add project-specific rules.
+
+---
+
 ## Updating
 
 ```bash
