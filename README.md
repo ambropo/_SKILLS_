@@ -1,67 +1,80 @@
-# Claude Code Skills for Academic Economists
+# Claude Code — Skills & Global Config
 
-Custom skills for Claude Code, focused on academic research workflows: paper auditing, literature review, LaTeX compilation, code review, and model solving.
-
-## Installation
-
-```bash
-# 1. Clone this repo
-git clone https://github.com/amatray/claude-skills-public ~/claude-skills
-
-# 2. Symlink into Claude Code
-ln -s ~/claude-skills/skills ~/.claude/skills
-
-# 3. Restart Claude Code (required for new skill directories)
-
-# 4. Verify: type / in Claude Code and confirm skills appear
-```
-
-**Important:** Each skill is a directory containing `SKILL.md`. Do NOT copy flat `.md` files into `~/.claude/skills/`; they will be silently ignored.
-
-If you already have skills in `~/.claude/skills/`, merge the contents rather than replacing the directory:
-
-```bash
-# Alternative: copy individual skills instead of symlinking the whole directory
-cp -r ~/claude-skills/skills/* ~/.claude/skills/
-```
-
-## Available Skills
-
-| Skill | Description |
-|-------|-------------|
-| `/prompt` | Reformats rough, dictated requests into structured prompts before executing |
-| `/prompt-only` | Same as /prompt but output only (does not execute) |
-| `/audit-paper` | Comprehensive paper audit (typos, grammar, style, apparatus, structure) |
-| `/audit-code` | Systematic code review against project conventions |
-| `/review-plan` | Stress-test any plan with structured expert critique |
-| `/review-plan-auto` | Automated iterative plan review with convergence detection and deterioration safeguards |
-| `/compile-latex` | Compile LaTeX documents, fix errors, re-compile until clean |
-| `/lit-review-verify` | Verify literature review claims against sources |
-| `/simulate-referee` | Simulate referee reports on a draft paper |
-| `/solving-model` | Guided workflow for solving economic models |
-| `/skill-creator` | Create, modify, and evaluate new skills |
-| `/pdf-chunker` | Reliable chunked extraction from PDF files |
-| `/overleaf` | Sync and compile Overleaf projects |
-| `/restart` | Snapshot the current session to `restart.md` before clearing context, so a fresh conversation can resume work |
-| `/memory` | Maintain a durable `PROJECT_MEMORY.md` at the project root (research question, decisions, data sources, workstreams, lessons) |
-
-## Global Configuration
-
-A global [`CLAUDE.md`](CLAUDE.md) lives in this folder and is symlinked to `~/.claude/CLAUDE.md`.
-It sets baseline research assistant standards (verification, reproducibility, academic style) that apply to every Claude Code session, in every project.
-
-Project-level `CLAUDE.md` files (e.g. in `VAR_Toolbox/`) stack on top of this baseline and add project-specific rules.
+Custom skills and global configuration for Claude Code, built for academic research workflows in economics.
 
 ---
 
-## Updating
+## Global Configuration
 
-```bash
-cd ~/claude-skills && git pull
-```
+[`CLAUDE.md`](CLAUDE.md) lives in this folder and is symlinked to `~/.claude/CLAUDE.md`. It sets research assistant standards that apply to every Claude Code session, in every project:
 
-Skills update live within an active session (no restart needed for edits to existing skills).
+- **Verification** — never claim something works without evidence; run and inspect all outputs
+- **Debugging** — own all errors; resolve before delivery
+- **Uncertainty** — distinguish established facts from assumptions; flag gaps explicitly
+- **Audience** — PhD economists, top-journal publication standard
+- **Reproducibility** — every result reproducible via a single documented pipeline
+- **Traceability** — every output maps to a script, output file, and dataset
+- **Definition discipline** — consistent variable definitions, samples, and transformations
+- **Internal consistency** — signs, units, labels, and cross-references verified before delivery
+- **Writing discipline** — dry, formal, academic style; clarity and logical flow
+- **Editing discipline** — local, minimal edits only; no unsolicited rewrites
+- **Citations** — complete, accurate, no placeholders
+- **Deliverables** — compile-ready (LaTeX) or run-ready (Stata/MATLAB/R)
+- **Pre-delivery checklist** — mandatory before sending any output
+- **Communication** — report what was done, what was verified, what remains uncertain
+- **Operating principle** — no unstated objectives; stop and clarify when in doubt
 
-## License
+Project-level `CLAUDE.md` files stack on top and add project-specific rules.
 
-MIT
+---
+
+## Skills
+
+This repo mixes skills from the [amatray/claude-skills-public](https://github.com/amatray/claude-skills-public) fork with custom skills built for this workflow.
+
+### Paper & Peer Review
+
+| Skill | Description |
+|-------|-------------|
+| `/audit-paper` | Full paper audit: typos, grammar, style, apparatus, structural coherence, and AI-pattern detection. Modular — run all or selected passes; supports track-changes markup or clean output. |
+| `/simulate-referee` | Simulated peer review: journal-calibrated Editor + 2 referee reports on your own paper. Surfaces weaknesses before submission. Supports AER, QJE, Econometrica, JFE, RFS. |
+| `/referee-report` | Draft a referee report and editor letter for a paper you are reviewing. |
+| `/referee-discuss` | Prepare a conference discussion: structured critique and discussant slides for a paper you have been assigned. |
+| `/lit-review-verify` | Audit citations against claims in a LaTeX or Markdown manuscript. Resolves DOIs, fetches abstracts, flags misattributions and weak references. |
+
+### Editing
+
+| Skill | Description |
+|-------|-------------|
+| `/edit-stata` | Comment, structure, and clean up Stata do-files. |
+| `/edit-matlab` | Comment, structure, and clean up MATLAB `.m` files. |
+| `/edit-slides` | Edit and restructure Beamer slide decks. |
+| `/edit-lecture` | Edit, improve, or extend written lecture notes for an economics course. |
+| `/edit-policy` | Edit policy notes, briefings, or speeches for a senior policymaker audience. |
+| `/edit-email-formal` | Edit formal professional emails to senior colleagues, editors, or external contacts. |
+| `/edit-email-quick` | Edit short, informal emails to peers or junior colleagues. |
+| `/edit-transcript` | Clean and format raw ASR transcripts from seminars, panels, or lectures. |
+
+### Journal Editorship (EER)
+
+| Skill | Description |
+|-------|-------------|
+| `/editor-draft-letters` | Draft EER decision letters (R&R or rejection) from manuscript and referee reports. |
+| `/editor-ref-consolidate` | Consolidate and compare referee reports for a manuscript. |
+
+### Research Workflow
+
+| Skill | Description |
+|-------|-------------|
+| `/solving-model` | Guided workflow for setting up, solving, and verifying an economic model with step-by-step derivations. |
+| `/audit-code` | Systematic review of Stata do-files: macro definitions, undefined paths, internal consistency, unused variables. |
+| `/compile-latex` | Compile LaTeX via the `xelatex → bibtex → xelatex → xelatex` pipeline; fix errors and re-compile until clean. |
+| `/overleaf` | Sync a local Overleaf project via Git (`pull` / `push`). |
+| `/pdf-chunker` | Reliable chunked extraction from PDF files — use for any PDF input. |
+| `/review-plan` | Stress-test a plan document: expert critique, blind spots, missing steps, unstated assumptions. |
+| `/review-plan-auto` | Automated iterative plan review with convergence detection and deterioration safeguards. |
+| `/prompt` | Reformat a rough or dictated request into a structured prompt, then execute it. |
+| `/prompt-only` | Same as `/prompt` but outputs the reformatted prompt only — does not execute. |
+| `/restart` | Snapshot the current session to `restart.md` before clearing context so a fresh conversation can resume. |
+| `/memory` | Maintain a durable `PROJECT_MEMORY.md` at the project root (research question, decisions, data, workstreams, lessons). |
+| `/skill-creator` | Create, modify, evaluate, and benchmark skills. |
