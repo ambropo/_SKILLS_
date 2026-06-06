@@ -1,20 +1,20 @@
 ---
-name: edit-slides
-description: Use when the user asks to edit, improve, or restructure academic presentation slides (Beamer or similar). Implements \claude{} annotations and applies editorial review for clarity, economy of language, and slide-level coherence. Triggers on "edit my slides", "improve these slides", "clean up this deck", "fix these bullets", or "/edit-slides".
-argument-hint: "[--clean] [slide range or topic] [path to .tex slide deck]"
+name: edit-paper
+description: Use when the user asks to edit, improve, or develop a draft academic economics paper. Implements \claude{} annotations and applies editorial review for argument structure, clarity, and precision. Complements /audit-paper (which handles typos, grammar, and apparatus). Triggers on "edit my paper", "edit this section", "work on this draft", "clean up this draft", or "/edit-paper".
+argument-hint: "[--clean] [section name or number] [path to .tex file(s)]"
 ---
 
 # SHARED PROTOCOL
 
 ## A. Mode detection
 
-Check `$ARGUMENTS` for `--clean`. If present, use **clean mode** throughout.
+Check `$ARGUMENTS` for `--clean`. If present, use **clean mode** throughout: Phase 1 shows final text only; implementation writes clean text directly.
 
 Otherwise, proceed without asking. Output mode (track-changes or clean) is determined at implementation time — see Section K.
 
 ## B. Scope
 
-Read `$ARGUMENTS` for a slide range, topic, or frame label (e.g., `slides 3–10`, `motivation section`, `frame:results`). If none is specified, scope is the whole deck.
+Read `$ARGUMENTS` for a section name, number, or range (e.g., `Introduction`, `2.3`, `Sections 2–4`). If none is specified, scope is the whole document.
 
 ## C. File discovery
 
@@ -23,7 +23,7 @@ Before starting any phase:
 1. If a path was provided in `$ARGUMENTS`, read that file or all `.tex` files in that directory.
 2. Parse the main `.tex` file for `\input{}` and `\include{}` commands. List all sub-files.
 3. Confirm the file list and order with the user.
-4. Estimate the number of frames in scope. State the estimate and which chunking mode applies.
+4. Estimate the word count of text content in scope (excluding LaTeX commands, comments, and preamble). State the estimate and which chunking mode applies.
 
 ## D. LaTeX handling
 
@@ -42,7 +42,7 @@ Focus only on text that will render in the compiled output.
 - All LaTeX commands: `\textit{}`, `\textbf{}`, `\emph{}`, `\cite{}`, `\citep{}`, `\citet{}`, `\ref{}`, `\eqref{}`, `\label{}`, `\autoref{}`, etc.
 - All math mode content: `$...$`, `\[...\]`, and all equation environments
 - All special characters: `\%`, `\&`, `\$`, `~`, `---`, `--`
-- All custom commands and Beamer environments defined in the preamble
+- All custom commands defined in the preamble
 
 Before finalising any suggestion, verify that every LaTeX command in the original text is preserved in the suggestion.
 
@@ -93,8 +93,8 @@ Apply the skill-specific editing rules below to the same scope.
 Apply the first rule that matches:
 
 1. **Multi-file (3+ files):** Process one file at a time per phase. STOP after each file. Wait for review before the next.
-2. **Long deck (>30 frames in scope):** Process 10–15 frames per response. STOP between batches.
-3. **Short deck (≤30 frames):** Process the whole scope per phase.
+2. **Long content (>5,000 words in scope):** Process 2–3 sections per response. STOP between batches. A single section exceeding ~3,000 words gets its own batch.
+3. **Short content (<5,000 words, 1–2 files):** Process the whole scope per phase.
 
 **Hard limit:** Aim for no more than ~40 suggestions per response. If output is growing long, stop and continue in the next response.
 
@@ -145,23 +145,19 @@ Edit the file in place. Confirm how many instances were resolved. If the user wa
 
 ## Audience
 
-Academic economists presenting at seminars, workshops, or conferences.
+PhD economists; target venue is top academic journals.
 
 ## Style
 
-Minimal text. Precise economic language. No filler. No abbreviations or acronyms unless defined earlier in the deck.
+Dry, precise academic prose. No filler. No hedging beyond what the evidence warrants. Each sentence follows cleanly from the previous. Prefer shorter sentences over compound ones.
 
 ## Editing rules
 
-- **One main message per slide** — if a slide tries to do more than one thing, split it
-- **One-line-per-bullet** — apply only when a bullet is ≥1.5 lines long: shorten to one line. If the content genuinely cannot be shortened below 1.5 lines, leave it
-- **Intuition before formalization** — prefer to introduce formal objects with a brief intuitive sentence where space and flow allow; do not impose this if the slide's register or structure makes it unnatural
-- **Long derivations → appendix** — keep the main deck clean; add appendix slides only where they materially improve comprehension
-- **No abbreviations or acronyms** unless defined earlier in the deck
-- **Consistency** — notation, sign conventions, units, and cross-references throughout
+- **Argument chain** — motivation → setup → result → implication must be explicit and logically tight at every step
+- **Claim precision** — claims calibrated to evidence; correlational ≠ causal; conditional results stated as conditional
+- **Paragraph structure** — one idea per paragraph; topic sentence states it; body supports it; no paragraph ends on a new idea
+- **Transitions** — each paragraph connects explicitly to the previous and next
+- **Prose concision** — no redundancy, no throat-clearing, no filler
+- **Identification and empirical rigor** — identifying assumptions stated explicitly; limitations flagged; robustness noted where relevant
 - **Typos and language** — flag typos, misspellings, imprecise word choice, and odd or unidiomatic phrasing
 - **Math** — if mathematical content is present: check notation consistency, verify equations are correctly stated, flag undefined symbols or apparent errors
-
-## Speaking notes
-
-Draft or revise only when explicitly requested via a `\claude{}` annotation on a specific slide.
